@@ -10,11 +10,11 @@ const mysql = require("./mysql/auth");
 const PORT = 8080;
 const HOST = 'localhost';
 
-app.get('/transactions', (req, res) => {
+app.get('/Transactions', (req, res) => {
   res.render('transactions');
 });
 
-app.get('/transactionsJson', (req, res) => {
+app.get('/TransactionsJson', (req, res) => {
   let con = mysql.getCon(); //TODO: move sql stuff into its own module
 
   con.connect(function (error) {
@@ -23,7 +23,45 @@ app.get('/transactionsJson', (req, res) => {
     }
   });
 
-  con.query("SELECT * FROM transaction;", (error, result) => { //TODO: query my transaction view instead of just the select
+  con.query("SELECT * FROM Transactions;", (error, result) => {
+    res.json(result);
+  });
+
+  con.end();
+
+});
+
+app.get('/CategoryTransfers', (req, res) => {
+  res.render('categoryTransfers');
+});
+
+app.get('/categoryTransfersJson', (req, res) => {
+  let con = mysql.getCon();
+
+  con.connect(function (error) {
+    if (error) {
+      return console.error(error);
+    }
+  });
+
+  con.query("SELECT * FROM CategoryTransfers;", (error, result) => {
+    res.json(result);
+  });
+
+  con.end();
+
+});
+
+app.get('/AccountBalanceJson', (req, res) => {
+  let con = mysql.getCon();
+
+  con.connect(function (error) {
+    if (error) {
+      return console.error(error);
+    }
+  });
+
+  con.query("SELECT * FROM AccountBalance;", (error, result) => {
     res.json(result);
   });
 

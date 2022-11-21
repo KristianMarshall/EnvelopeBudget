@@ -9,7 +9,25 @@
 
     <h1>Envelop Budget</h1>
     <h2>Links</h2>
-    <a href="/transactions">Transactions</a>
+    <a href="/Transactions">Transactions</a>
+    <a href="/CategoryTransfers">Category Transfers</a>
+    <h2 id="AB">Account Balances</h2>
+
+
+
+    <script type="text/javascript">
+        fetch("/AccountBalanceJson")
+        .then(response => response.json())
+        .then(data => {
+            let balanceHtml = "";
+
+            data.forEach(account => {
+                balanceHtml += `<p>${account.accountName}: $${account.balance}</p>\n`;
+            });
+
+            document.querySelector("#AB").insertAdjacentHTML("afterend", balanceHtml)
+        });
+    </script>
 </body>
 <footer>
 Kristian Marshall | <a href="mailto:Kristian.Marshall2@student.sl.on.ca">Kristian.Marshall2@student.sl.on.ca</a>

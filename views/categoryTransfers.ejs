@@ -1,18 +1,18 @@
-<%- include('./partials/header', { title: "Transactions - EB" }); %>
+<%- include('./partials/header', { title: "Category Transfers - EB" }); %>
 
-<h2>Transactions</h2>
+<h2>Category Transfers</h2>
 
 <table>
     <tr>
-        <th>Still Loading</th> 
+        <th>Still Loading</th>
     </tr>
 </table>
 
 
 <script type="text/javascript">
-    let table = document.querySelector("table"); //TODO: add buttons to edit or add a transaction
+    let table = document.querySelector("table"); //TODO: add buttons to edit or add a transfer
 
-    fetch("./transactionsJson")
+    fetch("./categoryTransfersJson")
     .then(response => response.json())
     .then(data => {
         let headings = Object.keys(data[0]);

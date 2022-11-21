@@ -178,7 +178,7 @@ ORDER BY transactionDate;
 
 -- Account Balance View
 CREATE VIEW AccountBalance AS
-SELECT  SUM(transactionAmt), accountName
+SELECT  SUM(transactionAmt) as balance, accountName
 FROM BudgetTest.transaction t
 	JOIN category c
     ON t.categoryID = c.categoryID
@@ -189,7 +189,7 @@ FROM BudgetTest.transaction t
 GROUP BY accountName;
 
 -- Catagory Transaction View
-CREATE VIEW CategoryTransactions AS
+CREATE VIEW CategoryTransfers AS
 SELECT catTranDate, catTranAmt,  tC.categoryName as ToCategory, fC.categoryName as FromCategory, catTranMemo
 FROM BudgetTest.categoryTransfer cT
 	join category tC

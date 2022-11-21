@@ -2,10 +2,18 @@ body{
     background-color: rgb(29, 29, 29);
     color: white;
 }
+table {
+    border-collapse: collapse;
+}
 
-table, th, td {
-    border:1px solid white;
-  }
+td, th {
+    border: 1px solid #8c8c8c;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #4d4d4d;
+}
 
 footer{
     margin-top: 3em;
