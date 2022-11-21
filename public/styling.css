@@ -1,0 +1,12 @@
+body{
+    background-color: rgb(29, 29, 29);
+    color: white;
+}
+
+table, th, td {
+    border:1px solid white;
+  }
+
+footer{
+    margin-top: 3em;
+}

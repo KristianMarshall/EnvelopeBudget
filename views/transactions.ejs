@@ -1,0 +1,39 @@
+<%- include('./partials/header', { title: "Transactions - EB" }); %>
+
+<h2>Transactions</h2>
+
+<table id="transactions">
+    <tr>
+        <th>Still Loading</th>
+    </tr>
+</table>
+
+
+<script type="text/javascript">
+    let table = document.getElementById("transactions");
+    table.innerHTML = ""; //Blank the table before adding data
+
+    fetch("./transactionsJson")
+    .then(response => response.json())
+    .then(data => {
+        let headings = Object.keys(data[0]);
+        let tableHTML = "";
+        
+        tableHTML += "<tr>\n";
+        for(let i = 0; i < headings.length; i++) {
+            tableHTML += `<th>${headings[i]}</th>\n`;
+        }
+        tableHTML += "</tr>\n";
+
+        for(let i = 0; i < data.length; i++) {
+            tableHTML += "<tr>\n";
+            for(let j = 0; j < headings.length; j++) {
+                tableHTML += `<td>${data[i][headings[j]]}</td>\n`;
+            }
+            tableHTML += "</tr>\n";
+        }
+        table.innerHTML = tableHTML; //every call to innerHTML on table adds a <tbody> around it
+    });
+</script>
+
+<%- include('./partials/footer'); %>
