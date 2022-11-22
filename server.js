@@ -6,9 +6,7 @@ app.set('view engine', 'ejs');
 
 const mysql = require("./mysql/auth");
 
-
-const PORT = 8080;
-const HOST = 'localhost';
+const PORT = 3000;
 
 app.get('/Transactions', (req, res) => {
   res.render('transactions');
@@ -69,6 +67,6 @@ app.get('/AccountBalanceJson', (req, res) => {
 
 });
 
-app.listen(PORT, HOST, () => {
-  console.log(`Running on http://${HOST}:${PORT}`);
+app.listen(PORT, () => {
+  console.log(`Node Started`);
 });
