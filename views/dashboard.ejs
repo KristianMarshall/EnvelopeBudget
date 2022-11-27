@@ -1,19 +1,4 @@
-<html>
-<head>
-    <title>
-        Envelope Budgeting
-    </title>
-    <link rel ="stylesheet" type = "text/css" href="./styling.css"/>
-</head>
-<body>
-    <div id="header">
-        <div id="navbar">
-            <h1>Envelope Budget</h1>
-            <a href="/">Dashboard</a>
-            <a href="/Transactions">Transactions</a>
-            <a href="/CategoryTransfers">Category Transfers</a>
-        </div>
-    </div> <%# //TODO: everything above this can by replaced by a partial %>
+<%- include('./partials/header', { title: "Dashboard - EB" }); %>
     <div class="page">
     <div id="leftbar">
         <h3 id="AB">Account Balances</h3>
@@ -28,9 +13,12 @@
     </div>
 
     <script type="text/javascript">
-        fetch("/DashboardJson") //TODO: Convert these to a promise.all
-        .then(response => response.json())
-        .then(data => {
+        let dashboardJson = fetch("/DashboardJson").then(response => response.json());
+        let accountBalanceJson = fetch("/AccountBalanceJson").then(response => response.json());
+
+        Promise.all([dashboardJson, accountBalanceJson]).then(allData => {
+            //Handling data from the dashboard json
+            let data = allData[0];
             let headings = Object.keys(data[0]);
             let tableHTML = "";
             
@@ -53,23 +41,18 @@
                 tableHTML += "</tr>\n";
             }
             document.querySelector("table").innerHTML = tableHTML; 
-        });
 
-        fetch("/AccountBalanceJson")
-        .then(response => response.json())
-        .then(data => {
+            //handling data from account balances json
+            let accounts = allData[1];
             let balanceHtml = "";
 
-            data.forEach(account => {
+            accounts.forEach(account => {
                 balanceHtml += `<p>${account.accountName}: $${account.balance}</p>\n`;
             });
 
             document.querySelector("#AB").insertAdjacentHTML("afterend", balanceHtml)
+
         });
     </script>
-</body> <%# //TODO: everything below this can by replaced by a partial maybe some of the script too %>
-<footer>
-Kristian Marshall | <a href="mailto:Kristian.Marshall2@student.sl.on.ca">Kristian.Marshall2@student.sl.on.ca</a>
-</footer>
-</html>
+<%- include('./partials/footer'); %>
 

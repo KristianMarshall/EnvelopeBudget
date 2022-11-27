@@ -1,5 +1,14 @@
+<script type="text/javascript">
+    //Stuff to run on every page
+    let pageLinks = document.querySelectorAll("#navbar a");
+
+    pageLinks.forEach(link =>{
+        if(document.title.includes(link.id))
+            link.classList.add("selected");
+    });
+</script>
 </body>
 <footer>
-Kristian Marshall | <a href="mailto:Kristian.Marshall2@student.sl.on.ca">Kristian.Marshall2@student.sl.on.ca</a>
+    Kristian Marshall | <a href="mailto:Kristian.Marshall2@student.sl.on.ca">Kristian.Marshall2@student.sl.on.ca</a>
 </footer>
 </html>

@@ -7,7 +7,7 @@
         <th>Still Loading</th> 
     </tr>
 </table>
-
+<input type="button" value="Add Row">
 
 <script type="text/javascript">
     let table = document.querySelector("table"); //TODO: add buttons to edit or add a transaction
@@ -29,14 +29,51 @@
             for(let j = 0; j < headings.length; j++) {
                 rowData = data[i][headings[j]];
 
-                if(typeof rowData == "number")
+                if(typeof rowData == "number") //Switch all the number values to currency.
                     rowData = rowData.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
+                else if(j == 0) //Modify the date value
+                    rowData = rowData.substr(0,10);
                     
                 tableHTML += `<td>${rowData}</td>\n`;
             }
             tableHTML += "</tr>\n";
         }
         table.innerHTML = tableHTML; //every call to innerHTML on table adds a <tbody> around it
+    });
+
+    document.querySelector("input").addEventListener("click", event => {
+
+        document.querySelector("table").innerHTML += //TODO: need to actually pull in info from database
+            `<tr>
+                <td><input type="date"></td>
+                <td><input></td>
+                <td>
+                    <select id="caegories" name="caegories">
+                        <option value=""> -- Select a category -- </option>
+                        <option>Account Transfer</option>
+                        <option>Rent</option>
+                        <option>Dining Out</option>
+                    </select>
+                </td>
+                <td>
+                    <select id="account" name="account">
+                        <option value=""> -- Select an account -- </option>
+                        <option>Spending</option>
+                        <option>Savings</option>
+                        <option>TFSA</option>
+                    </select>
+                </td>
+                <td>
+                    <select id="vendor" name="vendor">
+                        <option value=""> -- Select a vendor -- </option> 
+                        <option>East Side Marios</option>
+                        <option>Walmart</option>
+                        <option>Taco Bell</option>
+                    </select>
+                </td>
+                <td><input></td>
+            </tr>`;
+            //TODO: need to a way to submit the data
     });
 </script>
 
