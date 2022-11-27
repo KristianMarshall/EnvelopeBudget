@@ -8,6 +8,10 @@ const mysql = require("./mysql/auth");
 
 const PORT = 3000;
 
+app.get('/', (req, res) => {
+  res.render('dashboard');
+});
+
 app.get('/Transactions', (req, res) => {
   res.render('transactions');
 });
@@ -65,6 +69,20 @@ app.get('/AccountBalanceJson', (req, res) => {
 
   con.end();
 
+});
+
+app.get('/DashboardJson', (req, res) => {
+  let con = mysql.getCon();
+  
+  con.connect(function (error) {
+    if (error) {
+      return console.error(error);
+    }
+  });
+  con.query("SELECT * FROM Dashboard;", (error, result) => {
+    res.json(result);
+  });
+  con.end();
 });
 
 app.listen(PORT, () => {

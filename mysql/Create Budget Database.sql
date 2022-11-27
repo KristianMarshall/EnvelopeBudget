@@ -200,7 +200,7 @@ ORDER BY catTranDate;
 
 -- Category Activity View
 CREATE VIEW CategoryActivity AS
-SELECT  SUM(transactionAmt) as Activity, categoryName as Category
+SELECT  t.categoryID, SUM(transactionAmt) as Activity, categoryName as Category
 FROM BudgetTest.transaction t
 	join category c
     on t.categoryID = c.categoryID
@@ -209,34 +209,43 @@ FROM BudgetTest.transaction t
     left join vendor v
     on t.vendorID = v.vendorID
 WHERE NOT (t.categoryID = 2) 
-GROUP BY Category;
+GROUP BY Category, t.categoryID;
 
 -- Category Total Budgeted View
 CREATE VIEW CategoryTotalBudgeted AS
-SELECT SUM(Activity) AS Activity, Category
-FROM (	SELECT SUM(catTranAmt) as Activity, tC.categoryName as Category
+SELECT categoryID, SUM(Activity) AS Activity, Category
+FROM (	SELECT categoryID, SUM(catTranAmt) as Activity, tC.categoryName as Category
 		FROM BudgetTest.categoryTransfer cT
 			join category tC
 			on cT.toCategoryID = tC.categoryID
-		GROUP BY Category
+		GROUP BY Category, categoryID
 			UNION
-		SELECT SUM(catTranAmt)*-1 as Activity, fC.categoryName as Category
+		SELECT categoryID, SUM(catTranAmt)*-1 as Activity, fC.categoryName as Category
 		FROM BudgetTest.categoryTransfer cT
 			join category fC
 			on cT.fromCategoryID = fC.categoryID
-		GROUP BY Category
+		GROUP BY Category, categoryID
 	  ) as AlmostCategoryBalances
-GROUP BY Category;
+GROUP BY Category, categoryID;
 
 -- Category Balance VIEW
 CREATE VIEW CategoryBalance AS
-SELECT SUM(Activity) as Balance, Category
-FROM	(SELECT Activity, Category
+SELECT categoryID, SUM(Activity) as Balance, Category
+FROM	(SELECT categoryID, Activity, Category
 		FROM CategoryActivity
 			UNION
-		SELECT Activity, Category
+		SELECT categoryID, Activity, Category
 		FROM CategoryTotalBudgeted) as AlmostCategoryBalance
-GROUP BY Category;
+GROUP BY categoryID, Category;
+
+-- Dashboard VIEW
+CREATE VIEW Dashboard AS
+SELECT tB.categoryID, tB.category as Category, Balance, cA.Activity, tB.Activity as "Total Budgeted"
+FROM BudgetTest.CategoryTotalBudgeted tB
+	JOIN BudgetTest.CategoryActivity cA
+    ON cA.categoryID = tB.categoryID
+    JOIN BudgetTest.CategoryBalance cB
+    ON tB.categoryID = cB.categoryID;
 
 -- Stored Procedures
 DELIMITER $$
