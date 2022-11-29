@@ -1,11 +1,15 @@
 <script type="text/javascript">
     //Stuff to run on every page
+
+
+    //Highlights the current page in the navbar
     let pageLinks = document.querySelectorAll("#navbar a");
 
     pageLinks.forEach(link =>{
-        if(document.title.includes(link.id))
+        if(document.title.includes(link.id)) //TODO: maybe move into its own file
             link.classList.add("selected");
     });
+    
 </script>
 </body>
 <footer>

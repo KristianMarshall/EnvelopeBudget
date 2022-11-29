@@ -1,5 +1,7 @@
 FROM node:17
 
+RUN apt-get update && apt-get install -y --no-install-recommends dumb-init
+
 # Create app directory
 WORKDIR /usr/src/app
 
@@ -17,4 +19,4 @@ COPY . .
 
 EXPOSE 3000
 
-CMD [ "node", "server.js" ]
+CMD [ "dumb-init", "node", "server.js" ]

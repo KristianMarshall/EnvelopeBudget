@@ -1,5 +1,6 @@
 'use strict';
 const express = require('express');
+const queries = require('../Second Year/JavaScript - Comp 206/Code/Assignment 2/mysql/queries');
 const app = express();
 app.use(express.static("public"));
 app.set('view engine', 'ejs');
@@ -17,7 +18,7 @@ app.get('/Transactions', (req, res) => {
 });
 
 app.get('/TransactionsJson', (req, res) => {
-  let con = mysql.getCon(); //TODO: move sql stuff into its own module
+  let con = mysql.getCon(); 
 
   con.connect(function (error) {
     if (error) {
@@ -25,9 +26,22 @@ app.get('/TransactionsJson', (req, res) => {
     }
   });
 
-  con.query("SELECT * FROM Transactions;", (error, result) => {
-    res.json(result);
+  let transactionsQuery = querySql("SELECT * FROM Transactions");
+  let categoriesQuery = querySql("SELECT categoryID, categoryName FROM category");
+  let accountsQuery = querySql("SELECT accountID, accountName FROM BudgetTest.account");
+  let vendorsQuery = querySql("SELECT * FROM vendor");
+
+  Promise.all([transactionsQuery, categoriesQuery, accountsQuery, vendorsQuery])
+  .then(queriesData =>{
+    res.json({
+      transactions: queriesData[0],
+      categories:   queriesData[1],
+      accounts:     queriesData[2],
+      vendors:      queriesData[3],
+    });
   });
+  
+
 
   con.end();
 
@@ -88,3 +102,25 @@ app.get('/DashboardJson', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Node Started`);
 });
+
+function querySql(sql) {
+  let con = mysql.getCon();
+
+  con.connect(function(error) {
+      if (error) {
+        return console.error(error);
+      } 
+    });
+
+  return new Promise((resolve, reject) => {
+      con.query(sql, (error, sqlResult) => {
+          if(error) {
+              return reject(error);
+          }           
+
+          return resolve(sqlResult);
+      });
+
+      con.end();
+  });
+}

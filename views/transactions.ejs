@@ -10,24 +10,34 @@
 <input type="button" value="Add Row">
 
 <script type="text/javascript">
-    let table = document.querySelector("table"); //TODO: add buttons to edit or add a transaction
+    let table = document.querySelector("table");
+    let addedRows = 0;
+    //Initialized variables to be filled after the fetch has returned
+    let categories = "";
+    let vendors = "";
+    let accounts = "";
 
     fetch("./transactionsJson")
     .then(response => response.json())
     .then(data => {
-        let headings = Object.keys(data[0]);
+        //Pass queried data back to the rest of the page
+        categories = data.categories;
+        vendors = data.vendors;
+        accounts = data.accounts;
+
+        let headings = Object.keys(data.transactions[0]);
         let tableHTML = "";
-        
+
         tableHTML += "<tr>\n";
         for(let i = 0; i < headings.length; i++) {
             tableHTML += `<th>${headings[i]}</th>\n`;
         }
         tableHTML += "</tr>\n";
 
-        for(let i = 0; i < data.length; i++) {
+        for(let i = 0; i < data.transactions.length; i++) {
             tableHTML += "<tr>\n";
             for(let j = 0; j < headings.length; j++) {
-                rowData = data[i][headings[j]];
+                rowData = data.transactions[i][headings[j]];
 
                 if(typeof rowData == "number") //Switch all the number values to currency.
                     rowData = rowData.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
@@ -40,41 +50,64 @@
         }
         table.innerHTML = tableHTML; //every call to innerHTML on table adds a <tbody> around it
     });
-
+    
+    //Add row click event. Using the json data from the database it populates all the dropdowns.
     document.querySelector("input").addEventListener("click", event => {
-
-        document.querySelector("table").innerHTML += //TODO: need to actually pull in info from database
-            `<tr>
+        addedRows++;
+        let newTableRowHtml = `
+                <tr>
                 <td><input type="date"></td>
                 <td><input></td>
                 <td>
-                    <select id="caegories" name="caegories">
-                        <option value=""> -- Select a category -- </option>
-                        <option>Account Transfer</option>
-                        <option>Rent</option>
-                        <option>Dining Out</option>
+                    <select id="categories${addedRows}" name="categories">
+                        <option value=""> -- Select a category -- </option>`;
+        categories.forEach(category => {
+            newTableRowHtml += `<option value="${category.categoryID}">${category.categoryName}</option>`;
+        });
+        newTableRowHtml += `
                     </select>
                 </td>
                 <td>
-                    <select id="account" name="account">
-                        <option value=""> -- Select an account -- </option>
-                        <option>Spending</option>
-                        <option>Savings</option>
-                        <option>TFSA</option>
+                    <select id="account${addedRows}" name="account">
+                        <option value=""> -- Select an account -- </option>`;
+        accounts.forEach(account => {
+            newTableRowHtml += `<option value="${account.accountID}">${account.accountName}</option>`;
+        });
+        newTableRowHtml += `
                     </select>
                 </td>
                 <td>
-                    <select id="vendor" name="vendor">
-                        <option value=""> -- Select a vendor -- </option> 
-                        <option>East Side Marios</option>
-                        <option>Walmart</option>
-                        <option>Taco Bell</option>
+                    <select class="vendor" id="${addedRows}vendor" name="vendor">
+                        <option value=""> -- Select a vendor -- </option>
+                        <option value="new">* Add New *</option>`;
+        vendors.forEach(vendor => {
+            newTableRowHtml += `<option value="${vendor.vendorID}">${vendor.vendorName}</option>`;
+        });
+        newTableRowHtml += `
                     </select>
                 </td>
                 <td><input></td>
             </tr>`;
-            //TODO: need to a way to submit the data
+        document.querySelector("table").innerHTML += newTableRowHtml;
+
+        //add event listener to each vendor dropdown. the event listeners oddly erase every time a new one is added so they all have to be re-added every time.
+        document.querySelectorAll(`.vendor`).forEach(venInput =>{
+            
+            //when a vendor dropdown switches to add new then replace the dropdown with a textbox.
+            venInput.addEventListener("change", event => {
+                if(event.currentTarget.value == "new"){
+                    event.currentTarget.insertAdjacentHTML("afterend", `<input type="text" class="vendor" id="${event.currentTarget.id[0]}vendor">`);
+                    event.currentTarget.remove();
+                }
+            });
+        });
+        
     });
+
+    
+
+    
+    //TODO: need to a way to submit data
 </script>
 
 <%- include('./partials/footer'); %>
