@@ -174,7 +174,7 @@ FROM BudgetTest.transaction t
     ON t.accountID = a.accountID
     LEFT JOIN vendor v
     ON t.vendorID = v.vendorID
-ORDER BY transactionDate;
+ORDER BY transactionDate DESC;
 
 -- Account Balance View
 CREATE VIEW AccountBalance AS
@@ -196,7 +196,7 @@ FROM BudgetTest.categoryTransfer cT
     on cT.toCategoryID = tC.categoryID
     join category fC
     on cT.fromCategoryID = fC.categoryID
-ORDER BY catTranDate;
+ORDER BY catTranDate DESC;
 
 -- Category Activity View
 CREATE VIEW CategoryActivity AS
