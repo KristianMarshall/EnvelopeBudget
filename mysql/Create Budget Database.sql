@@ -166,7 +166,7 @@ FROM BudgetTest.category c
 
 -- Transaction View
 CREATE VIEW Transactions AS
-SELECT transactionDate, transactionAmt, categoryName, accountName, vendorName, transcationMemo
+SELECT transactionID, categoryID, accountID, vendorID, transactionDate, transactionAmt, categoryName, accountName, vendorName, transcationMemo
 FROM BudgetTest.transaction t
 	JOIN category c
     ON t.categoryID = c.categoryID

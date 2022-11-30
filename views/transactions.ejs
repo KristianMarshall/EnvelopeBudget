@@ -2,6 +2,7 @@
 
 <h2>Transactions</h2>
 
+<input type="button" value="Add Row">
 <table>
     <thead>
         <tr>
@@ -12,7 +13,6 @@
 
     </tbody>
 </table>
-<input type="button" value="Add Row">
 
 <script type="text/javascript">
     let table = document.querySelector("tbody");
@@ -25,14 +25,14 @@
     fetch("./transactionsJson")
     .then(response => response.json())
     .then(jsonData => {
-        //Pass queried data back to the rest of the page
-        data = jsonData;
-
+        
+        data = jsonData; //Pass queried data back to the rest of the page
+        let displayColumnsStartIdx = 4; //query has all the id's in the front but i don't want to display them
         let headings = Object.keys(jsonData.transactions[0]);
         let tableHTML = "";
 
         tableHTML += "<tr>\n";
-        for(let i = 0; i < headings.length; i++) {
+        for(let i = displayColumnsStartIdx; i < headings.length; i++) {
             tableHTML += `<th>${headings[i]}</th>\n`;
         }
         tableHTML += `<th>Actions</th>\n`;
@@ -43,20 +43,20 @@
 
         for(let i = 0; i < jsonData.transactions.length; i++) {
             totalRows++;
-            tableHTML += `<tr class="row" id="row ${totalRows}">\n`;
-            for(let j = 0; j < headings.length; j++) {
+            tableHTML += `<tr class="row" id="row_${totalRows}">\n`; //TODO: change from total row count as the index to the transaction id as the index
+            for(let j = displayColumnsStartIdx; j < headings.length; j++) {
                 rowData = jsonData.transactions[i][headings[j]];
 
                 if(typeof rowData == "number") //Switch all the number values to currency.
                     rowData = rowData.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
-                else if(j == 0) //Modify the date value
+                else if(j == displayColumnsStartIdx) //Modify the date value //TODO: should find a better way to reference this column
                     rowData = rowData.substr(0,10);
                     
                     tableHTML += `<td>${rowData}</td>\n`;
             }
             
             tableHTML += `
-                <td><input type="button" value="Edit" class="edit" id="edit ${totalRows}"></td>
+                <td><input type="button" value="Edit" class="edit" id="edit_${totalRows}"></td>
                 </tr>\n`;
         }
 
@@ -68,45 +68,10 @@
     
     //Add row click event. Using the json data from the database it populates all the dropdowns.
     document.querySelector("input").addEventListener("click", event => {
-        addedRows++;
-        totalRows++;
-        let newTableRowHtml = `
-            <tr class="row" id="row ${totalRows}">
-                <td><input type="date"></td>
-                <td><input></td>
-                <td>
-                    <select id="categories${addedRows}" name="categories">
-                        <option value=""> -- Select a category -- </option>`;
-        data.categories.forEach(category => {
-            newTableRowHtml += `<option value="${category.categoryID}">${category.categoryName}</option>`;
-        });
-        newTableRowHtml += `
-                    </select>
-                </td>
-                <td>
-                    <select id="account${addedRows}" name="account">
-                        <option value=""> -- Select an account -- </option>`;
-        data.accounts.forEach(account => {
-            newTableRowHtml += `<option value="${account.accountID}">${account.accountName}</option>`;
-        });
-        newTableRowHtml += `
-                    </select>
-                </td>
-                <td>
-                    <select class="vendor" id="${addedRows}vendor" name="vendor">
-                        <option value=""> -- Select a vendor -- </option>
-                        <option value="new">* Add New *</option>`;
-        data.vendors.forEach(vendor => {
-            newTableRowHtml += `<option value="${vendor.vendorID}">${vendor.vendorName}</option>`;
-        });
-        newTableRowHtml += `
-                    </select>
-                </td>
-                <td><input></td>
-                <td><input class="done" id="${addedRows}done" type="button" value="Done"></td>
-            </tr>`;
-        table.innerHTML += newTableRowHtml;
         
+        totalRows++;
+        table.querySelector("tr").insertAdjacentHTML("beforebegin", drawTableRow(totalRows)); //FIXME: adds the wrong rowID to the row. going by transaction id might fix it?
+
         //readds the event listeners for the done buttons and the vendor selector.
         addAllEventListeners();
 
@@ -119,7 +84,7 @@
             //when a vendor dropdown switches to add new then replace the dropdown with a textbox.
             venInput.addEventListener("change", event => {
                 if(event.currentTarget.value == "new"){
-                    event.currentTarget.insertAdjacentHTML("afterend", `<input class="vendor" id="${event.currentTarget.id[0]}vendor">`);
+                    event.currentTarget.insertAdjacentHTML("afterend", `<input class="vendor">`);
                     event.currentTarget.remove();
                 }
             });
@@ -137,15 +102,71 @@
 
         document.querySelectorAll(".edit").forEach(editButton =>{
             editButton.addEventListener("click", event => {
-                editRow(event.currentTarget.id.split(' ')[1]); //Grabs the rowID by splitting it off of the clicked buttons id.
+                editRow(event.currentTarget.id.split('_')[1]); //Grabs the rowID by splitting it off of the clicked buttons id.
             });
         });
 
     }
 
+    function drawTableRow(rowID){
+        let newTableRowHtml = `
+            <tr class="row" id="row_${rowID}">
+                <td><input class="date" type="date"></td>
+                <td><input class="amt"></td>
+                <td>
+                    <select class="category" name="categories">
+                        <option value=""> -- Select a category -- </option>`;
+        data.categories.forEach(category => {
+            newTableRowHtml += `<option value="${category.categoryID}">${category.categoryName}</option>`;
+        });
+        newTableRowHtml += `
+                    </select>
+                </td>
+                <td>
+                    <select class="account" name="account">
+                        <option value=""> -- Select an account -- </option>`;
+        data.accounts.forEach(account => {
+            newTableRowHtml += `<option value="${account.accountID}">${account.accountName}</option>`;
+        });
+        newTableRowHtml += `
+                    </select>
+                </td>
+                <td>
+                    <select class="vendor" name="vendor">
+                        <option value=""> -- Select a vendor -- </option>
+                        <option value="new">* Add New *</option>`;
+        data.vendors.forEach(vendor => {
+            newTableRowHtml += `<option value="${vendor.vendorID}">${vendor.vendorName}</option>`;
+        });
+        newTableRowHtml += `
+                    </select>
+                </td>
+                <td><input class="memo"></td>
+                <td><input class="done" id="done_${rowID}" type="button" value="Done"></td>
+            </tr>`;
+        return newTableRowHtml;
+    }
+
     function editRow(rowID){
-        //TODO: pass current row into function and remove() it. add a new row at the current edit location. then use data.transactions to fill all the input fields
-        console.log("edit button "+ event.currentTarget.id.split(' ')[1] + " clicked");  
+        //add new row after the current one. then delete the current one
+        let currentRow = document.querySelector("#row_"+ rowID);
+        totalRows--;
+        currentRow.insertAdjacentHTML("afterend", drawTableRow(rowID));
+        currentRow.remove();
+
+        //reselect the new row
+        currentRow = document.querySelector("#row_"+ rowID);
+
+        //Add all table date into the fields
+        currentRow.querySelector(".date").value = data.transactions[rowID-1].transactionDate.substr(0,10);
+        currentRow.querySelector(".amt").value = data.transactions[rowID-1].transactionAmt;
+        currentRow.querySelector(".category").value = data.transactions[rowID-1].categoryID;
+        currentRow.querySelector(".account").value = data.transactions[rowID-1].accountID;
+        currentRow.querySelector(".vendor").value = data.transactions[rowID-1].vendorID;
+
+        //TODO: Need to call the submit function here too. not sure if ill check if data has changed or not
+
+        addAllEventListeners();
     }
 
     function getRowInfo(index){

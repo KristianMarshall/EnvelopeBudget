@@ -40,8 +40,6 @@ app.get('/TransactionsJson', (req, res) => {
     });
   });
   
-
-
   con.end();
 
 });
