@@ -1,6 +1,5 @@
 'use strict';
 const express = require('express');
-const queries = require('../Second Year/JavaScript - Comp 206/Code/Assignment 2/mysql/queries');
 const app = express();
 app.use(express.static("public"));
 app.set('view engine', 'ejs');
