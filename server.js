@@ -98,22 +98,33 @@ app.get('/DashboardJson', (req, res) => {
 });
 
 app.post('/transactionSubmitJson', (req, res) => {
-  let con = mysql.getCon();
 
   console.log(req.body);
-
-  con.connect(function (error) {
-    if (error) {
-      return console.error(error);
-    }
-  });
-
+  
+  let query = "";
   //TODO: need to actually update the table once the data comes in properly
-  con.query("UPDATE", (error, result) => {
-    console.log("maybe put errors here")
-  });
+  if(req.body.transactionID != null)
+    query = `
+    UPDATE transaction
+    SET transactionDate = ?, transactionAmt = ?, categoryID = ?, accountID = ?, vendorID = ?, transactionMemo = ?
+    WHERE transactionID = ?`;
+  else
+    query = "";
 
-  con.end();
+  let safeQuery = mysql.functions.format(query, [
+    req.body.transactionDate, 
+    req.body.transactionAmt, 
+    req.body.categoryID, 
+    req.body.accountID, 
+    req.body.vendorID, //FIXME: if any of these are null the query fails
+    req.body.transactionMemo, 
+    req.body.transactionID
+  ]);
+
+  querySql(safeQuery).then(result => {
+      console.log(result);
+  });
+  
 });
 
 app.listen(PORT, () => {
