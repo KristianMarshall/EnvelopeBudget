@@ -64,7 +64,7 @@ CREATE TABLE transaction
 		CONSTRAINT	transaction_fk_vendor
 		FOREIGN KEY(vendorID)				
         REFERENCES vendor(vendorID),
-	transcationMemo			VARCHAR(150),
+	transactionMemo			VARCHAR(150),
     transactionNotCleared	BOOLEAN		NOT NULL	DEFAULT 0
 );
 
@@ -129,7 +129,7 @@ INSERT INTO vendor VALUES
 (0, 'Walmart'),
 (0, 'Taco Bell');
 
--- transactionID, transactionDate, transactionAmt, categoryID, accountID, vendorID, transcationMemo, transactionNotCleared
+-- transactionID, transactionDate, transactionAmt, categoryID, accountID, vendorID, transactionMemo, transactionNotCleared
 INSERT INTO transaction VALUES
 (0,	'2021-01-01', 2000, 	 1, 1, NULL, 	'Start Of Budget',	DEFAULT),
 (0,	'2021-01-01', 8000, 	 1, 2, NULL, 	'Start Of Budget',	DEFAULT),
@@ -166,7 +166,7 @@ FROM BudgetTest.category c
 
 -- Transaction View
 CREATE VIEW Transactions AS
-SELECT transactionID, categoryID, accountID, vendorID, transactionDate, transactionAmt, categoryName, accountName, vendorName, transcationMemo
+SELECT transactionID, t.categoryID, t.accountID, t.vendorID, transactionDate, transactionAmt, categoryName, accountName, vendorName, transactionMemo
 FROM BudgetTest.transaction t
 	JOIN category c
     ON t.categoryID = c.categoryID
@@ -188,7 +188,7 @@ FROM BudgetTest.transaction t
     ON t.vendorID = v.vendorID
 GROUP BY accountName;
 
--- Catagory Transaction View
+-- Category Transaction View
 CREATE VIEW CategoryTransfers AS
 SELECT catTranDate, catTranAmt,  tC.categoryName as ToCategory, fC.categoryName as FromCategory, catTranMemo
 FROM BudgetTest.categoryTransfer cT
@@ -319,8 +319,8 @@ WHERE transactionAmt > 0
     AND NOT categoryID = 2;
 END$$
 
--- Category Activiy Between Dates
-CREATE PROCEDURE CategoryActiviyBetweenDates(fromDate DATE, toDate DATE)
+-- Category Activity Between Dates
+CREATE PROCEDURE CategoryActivityBetweenDates(fromDate DATE, toDate DATE)
 BEGIN
 SELECT  SUM(transactionAmt) as Activity, categoryName as Category
 FROM BudgetTest.transaction t

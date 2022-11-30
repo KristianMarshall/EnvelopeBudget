@@ -22,6 +22,7 @@
     let data = "";
 
 
+    //This fetch grabs all of the data for the page. then draws the table with the information.
     fetch("./transactionsJson")
     .then(response => response.json())
     .then(jsonData => {
@@ -49,8 +50,12 @@
 
                 if(typeof rowData == "number") //Switch all the number values to currency.
                     rowData = rowData.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
-                else if(j == displayColumnsStartIdx) //Modify the date value //TODO: should find a better way to reference this column
-                    rowData = rowData.substr(0,10);
+                else if(headings[j] == "transactionDate") //Modify the date value to remove the time 
+                    rowData = rowData.substr(0,10); //TODO: switch to date object.
+                else if(rowData == null)
+                    rowData = "";
+
+
                     
                     tableHTML += `<td>${rowData}</td>\n`;
             }
@@ -72,11 +77,19 @@
         totalRows++;
         table.querySelector("tr").insertAdjacentHTML("beforebegin", drawTableRow(totalRows)); //FIXME: adds the wrong rowID to the row. going by transaction id might fix it?
 
+        //Adding the new buttons event listen here seems to fix the issue will the all event listener function
+        document.querySelector(`#done_${totalRows}`).addEventListener("click", event => {
+                submitRow(event.currentTarget.id.split('_')[1]);
+                console.log("done button " +event.currentTarget.id.split('_')[1] + " clicked");
+        });
+
         //readds the event listeners for the done buttons and the vendor selector.
-        addAllEventListeners();
+        //only adding one new button i dont think this needs to be called 
+        //addAllEventListeners(); //TODO: remove?
 
     });
 
+    //FIXME: i think this isnt right. but i think i fixed it. it starts to slow down the page as more listeners are added. buttons call functions multiple times //TODO: check where this is called and if the problem is fixed
     function addAllEventListeners(){
         //add event listener to each vendor dropdown. the event listeners oddly erase every time a new one is added so they all have to be re-added every time.
         document.querySelectorAll(`.vendor`).forEach(venInput =>{
@@ -93,10 +106,9 @@
         //same deal as above
         document.querySelectorAll(`.done`).forEach(doneInput =>{
             
-            //when a vendor dropdown switches to add new then replace the dropdown with a textbox.
             doneInput.addEventListener("click", event => {
-                //TODO: call the submit data function.
-                console.log("done button clicked");
+                submitRow(event.currentTarget.id.split('_')[1]);
+                console.log("done button " +event.currentTarget.id.split('_')[1] + " clicked");
             });
         });
 
@@ -150,9 +162,14 @@
     function editRow(rowID){
         //add new row after the current one. then delete the current one
         let currentRow = document.querySelector("#row_"+ rowID);
-        totalRows--;
         currentRow.insertAdjacentHTML("afterend", drawTableRow(rowID));
         currentRow.remove();
+
+        //Adding the new buttons event listen here seems to fix the issue will the all event listener function
+        document.querySelector(`#done_${rowID}`).addEventListener("click", event => {
+                submitRow(event.currentTarget.id.split('_')[1]);
+                console.log("done button " +event.currentTarget.id.split('_')[1] + " clicked");
+        });
 
         //reselect the new row
         currentRow = document.querySelector("#row_"+ rowID);
@@ -162,19 +179,28 @@
         currentRow.querySelector(".amt").value = data.transactions[rowID-1].transactionAmt;
         currentRow.querySelector(".category").value = data.transactions[rowID-1].categoryID;
         currentRow.querySelector(".account").value = data.transactions[rowID-1].accountID;
-        currentRow.querySelector(".vendor").value = data.transactions[rowID-1].vendorID;
 
-        //TODO: Need to call the submit function here too. not sure if ill check if data has changed or not
+        let vendorValue = data.transactions[rowID-1].vendorID
+        currentRow.querySelector(".vendor").value = vendorValue == null ? "" : vendorValue; //This fixes the dropdown selecting a blank value
 
-        addAllEventListeners();
+        currentRow.querySelector(".memo").value = data.transactions[rowID-1].transactionMemo;
+        
+        //shouldnt call this here if we are only updating the one button
+        //addAllEventListeners(); //TODO: remove?
     }
 
-    function getRowInfo(index){
+    function submitRow(rowID){
+        let body = data.transactions[rowID-1]; //FIXME: this doesn't work for new rows
 
+        fetch("/transactionSubmitJson", {
+            method: 'post',
+            body: JSON.stringify(body),
+            headers: {'Content-Type': 'application/json'}
+        });
     }
 
     //TODO: need a submit all button
-    //TODO: need to a way to submit data
+    
 </script>
 
 <%- include('./partials/footer'); %>

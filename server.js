@@ -2,6 +2,7 @@
 const express = require('express');
 const app = express();
 app.use(express.static("public"));
+app.use(express.json());
 app.set('view engine', 'ejs');
 
 const mysql = require("./mysql/auth");
@@ -93,6 +94,25 @@ app.get('/DashboardJson', (req, res) => {
   con.query("SELECT * FROM Dashboard;", (error, result) => {
     res.json(result);
   });
+  con.end();
+});
+
+app.post('/transactionSubmitJson', (req, res) => {
+  let con = mysql.getCon();
+
+  console.log(req.body);
+
+  con.connect(function (error) {
+    if (error) {
+      return console.error(error);
+    }
+  });
+
+  //TODO: need to actually update the table once the data comes in properly
+  con.query("UPDATE", (error, result) => {
+    console.log("maybe put errors here")
+  });
+
   con.end();
 });
 
