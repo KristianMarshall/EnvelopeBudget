@@ -27,7 +27,7 @@ fetch("./transactionsJson")
 
     for(let i = 0; i < jsonData.transactions.length; i++) {
         totalRows++;
-        tableHTML += `<tr class="row" id="row_${jsonData.transactions[i].transactionID}">\n`; //TODO: change from total row count as the index to the transaction id as the index
+        tableHTML += `<tr class="row" id="row_${jsonData.transactions[i].transactionID}">\n`; //TODO: PICKUP HERE: maybe turn this into a method so i can use it again later. then when submitting a row it will update nicely and it fixes duplicate code with the setRow()
         for(let j = displayColumnsStartIdx; j < headings.length; j++) {
             rowData = jsonData.transactions[i][headings[j]];
 
@@ -38,77 +38,21 @@ fetch("./transactionsJson")
             else if(rowData == null)
                 rowData = "";
 
-
-                
                 tableHTML += `<td>${rowData}</td>\n`;
         }
         
         tableHTML += `
-            <td><input type="button" value="Edit" class="edit" id="edit_${jsonData.transactions[i].transactionID}"></td>
+            <td><input type="button" value="Edit" class="edit" onclick="editRow(${jsonData.transactions[i].transactionID})"></td>
             </tr>\n`;
     }
 
     table.innerHTML = tableHTML;
-
-    //adds the event listeners for the edit buttons
-    addAllEventListeners();
 });
 
 //Add row click event. Using the json data from the database it populates all the dropdowns.
-document.querySelector("input").addEventListener("click", event => {
-    
+function addRow() {
     totalRows++;
     table.querySelector("tr").insertAdjacentHTML("beforebegin", drawTableRow(totalRows)); //FIXME: adds the wrong rowID to the row. going by transaction id might fix it? or actually just reverse the row id's from top to bottom
-
-    //Adding the new buttons event listen here seems to fix the issue will the all event listener function
-    document.querySelector(`#done_${totalRows}`).addEventListener("click", event => {
-            submitRow(event.currentTarget.id.split('_')[1]);
-            console.log("done button " +event.currentTarget.id.split('_')[1] + " clicked");
-    });
-
-    //when a vendor dropdown switches to add new then replace the dropdown with a textbox. //FIXME: not sure if this should be here. but commenting out the add event listeners broke the add new vendor.
-    document.querySelector(`#vendor_${totalRows}`).addEventListener("change", event => {
-        if(event.currentTarget.value == "new"){
-            event.currentTarget.insertAdjacentHTML("afterend", `<input class="vendor">`);
-            event.currentTarget.remove();
-        }
-    });
-
-    //readds the event listeners for the done buttons and the vendor selector.
-    //only adding one new button i dont think this needs to be called 
-    //addAllEventListeners(); //TODO: remove?
-
-});
-
-//FIXME: i think this isnt right. but i think i fixed it. it starts to slow down the page as more listeners are added. buttons call functions multiple times //TODO: check where this is called and if the problem is fixed
-function addAllEventListeners(){
-    //add event listener to each vendor dropdown. the event listeners oddly erase every time a new one is added so they all have to be re-added every time.
-    document.querySelectorAll(`.vendor`).forEach(venInput =>{
-        
-        //when a vendor dropdown switches to add new then replace the dropdown with a textbox.
-        venInput.addEventListener("change", event => {
-            if(event.currentTarget.value == "new"){
-                event.currentTarget.insertAdjacentHTML("afterend", `<input class="vendor">`);
-                event.currentTarget.remove();
-            }
-        });
-    });
-
-    //same deal as above
-    document.querySelectorAll(`.done`).forEach(doneInput =>{
-        
-        doneInput.addEventListener("click", event => {
-            submitRow(event.currentTarget.id.split('_')[1]);
-            console.log("done button " +event.currentTarget.id.split('_')[1] + " clicked");
-        });
-    });
-
-    document.querySelectorAll(".edit").forEach(editButton =>{
-        editButton.addEventListener("click", event => {
-            editRow(event.currentTarget.id.split('_')[1]); //Grabs the rowID by splitting it off of the clicked buttons id.
-        });
-    });
-
 }
 
 function drawTableRow(rowID){
@@ -135,7 +79,7 @@ function drawTableRow(rowID){
                 </select>
             </td>
             <td>
-                <select class="vendor" name="vendor">
+                <select class="vendor" name="vendor" onchange="vendorSwapInput(${rowID})">
                     <option value="NULL"> -- Select a vendor -- </option>
                     <option value="new">* Add New *</option>`;
     data.vendors.forEach(vendor => {
@@ -145,9 +89,17 @@ function drawTableRow(rowID){
                 </select>
             </td>
             <td><input class="memo"></td>
-            <td><input class="done" id="done_${rowID}" type="button" value="Done"></td>
+            <td><input class="done" type="button" value="Done" onclick="submitRow(${rowID})"></td>
         </tr>`;
     return newTableRowHtml;
+}
+
+function vendorSwapInput(rowID){
+    let vendorSelect = document.querySelector(`#row_${rowID} .vendor`)
+    if(vendorSelect.value == "new"){
+        vendorSelect.insertAdjacentHTML("afterend", `<input class="vendor">`);
+        vendorSelect.remove();
+    }
 }
 
 function editRow(rowID){
@@ -155,12 +107,6 @@ function editRow(rowID){
     let currentRow = document.querySelector("#row_"+ rowID);
     currentRow.insertAdjacentHTML("afterend", drawTableRow(rowID));
     currentRow.remove();
-
-    //Adding the new buttons event listen here seems to fix the issue will the all event listener function
-    document.querySelector(`#done_${rowID}`).addEventListener("click", event => {
-            submitRow(event.currentTarget.id.split('_')[1]);
-            console.log("done button " +event.currentTarget.id.split('_')[1] + " clicked");
-    });
 
     //reselect the new row
     currentRow = document.querySelector("#row_"+ rowID);
@@ -170,7 +116,7 @@ function editRow(rowID){
             break;
     
     //Add all table date into the fields
-    currentRow.querySelector(".date").value = data.transactions[transIndex].transactionDate.substr(0,10);
+    currentRow.querySelector(".date").value = data.transactions[transIndex].transactionDate.substr(0,10); //FIXME: after editing row and submitting this now pulls the wrong info
     currentRow.querySelector(".amt").value = data.transactions[transIndex].transactionAmt;
     currentRow.querySelector(".category").value = data.transactions[transIndex].categoryID;
     currentRow.querySelector(".account").value = data.transactions[transIndex].accountID;
@@ -180,8 +126,23 @@ function editRow(rowID){
 
     currentRow.querySelector(".memo").value = data.transactions[transIndex].transactionMemo;
     
-    //shouldnt call this here if we are only updating the one button
-    //addAllEventListeners(); //TODO: remove?
+}
+
+function setRow(rowID, rowData){
+    let currentRow = document.querySelector(`#row_${rowID}`)
+
+
+    let newRow = `<tr class="row" id="row_${rowID}">\n`;
+    delete rowData.transactionID;
+    Object.values(rowData).forEach(field =>{ //FIXME: pulls the ID's not the names
+        newRow += `<td>${field}</td>\n`;
+    });
+
+    newRow += `<td><input type="button" value="Edit" class="edit" onclick="editRow(${rowID})"></td>
+               </tr>\n`
+
+    currentRow.insertAdjacentHTML("afterend", newRow);
+    currentRow.remove();
 }
 
 function getRowData(rowID){
@@ -193,7 +154,7 @@ function getRowData(rowID){
         transactionAmt:     currentRow.querySelector(".amt").value,
         categoryID:         currentRow.querySelector(".category").value,
         accountID:          currentRow.querySelector(".account").value,
-        vendorID:           currentRow.querySelector(".vendor").value,
+        vendorID:           currentRow.querySelector(".vendor").value, //TODO: need to add a way to check if its a new vendor and make the appropriate changes first
         transactionMemo:    currentRow.querySelector(".memo").value
     }
     
@@ -207,7 +168,12 @@ function submitRow(rowID){
         method: 'post',
         body: JSON.stringify(body),
         headers: {'Content-Type': 'application/json'}
+    })
+    .then(response => response.json())
+    .then(result =>{
+        console.log(result); //TODO: error check
+        setRow(rowID, body);
     });
 }
 
-//TODO: need a submit all button
+//TODO: need a submit all button. refresh the whole table when clicked

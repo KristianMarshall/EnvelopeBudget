@@ -102,7 +102,6 @@ app.post('/transactionSubmitJson', (req, res) => {
   console.log(req.body);
   
   let query = "";
-  //TODO: need to actually update the table once the data comes in properly
   if(req.body.transactionID != null)
     query = `
     UPDATE transaction
@@ -123,6 +122,7 @@ app.post('/transactionSubmitJson', (req, res) => {
 
   querySql(safeQuery).then(result => {
       console.log(result);
+      res.json(result);
   });
   
 });
