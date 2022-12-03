@@ -148,6 +148,7 @@ function setRow(rowID, rowData){
 function getRowData(rowID){
     currentRow = document.querySelector("#row_"+ rowID);
 
+    //TODO: all of this needs error checking but you should do it server side
     let rowData = {
         transactionID:      rowID > (totalRows-addedRows) ? null : rowID, //FIXME: maybe broken with the new rowID system.
         transactionDate:    currentRow.querySelector(".date").value,
@@ -155,7 +156,7 @@ function getRowData(rowID){
         categoryID:         currentRow.querySelector(".category").value,
         accountID:          currentRow.querySelector(".account").value,
         vendorID:           currentRow.querySelector(".vendor").value, //TODO: need to add a way to check if its a new vendor and make the appropriate changes first
-        transactionMemo:    currentRow.querySelector(".memo").value
+        transactionMemo:    currentRow.querySelector(".memo").value == '' ? undefined : currentRow.querySelector(".memo").value 
     }
     
     return rowData;
