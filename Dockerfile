@@ -19,4 +19,4 @@ COPY . .
 
 EXPOSE 3000
 
-CMD [ "dumb-init", "node", "server.js" ]
+CMD [ "dumb-init", "npx", "nodemon" ]

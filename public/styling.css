@@ -41,6 +41,7 @@ footer{
     font-weight: bold;
     text-decoration: none;
     padding: .6em;
+    vertical-align: middle;
     flex:1; 
 }
 #navbar h1{

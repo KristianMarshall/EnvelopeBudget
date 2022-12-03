@@ -97,6 +97,21 @@ app.get('/DashboardJson', (req, res) => {
   con.end();
 });
 
+app.get('/githubPull', (req, res) => {
+  const { exec } = require('child_process');
+  exec('git pull', (err, stdout, stderr) => {
+    if (err) {
+      //some err occurred
+      console.error(err)
+    } else {
+    // the *entire* stdout and stderr (buffered)
+    console.log(`stdout: ${stdout}`);
+    console.log(`stderr: ${stderr}`);
+    }
+    res.redirect('/');
+  });
+});
+
 app.post('/transactionSubmitJson', (req, res) => {
 
   console.log(req.body);
@@ -126,6 +141,8 @@ app.post('/transactionSubmitJson', (req, res) => {
   });
   
 });
+
+
 
 app.listen(PORT, () => {
   console.log(`Node Started`);
