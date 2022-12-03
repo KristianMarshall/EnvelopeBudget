@@ -1,54 +1,45 @@
-let table = document.querySelector("tbody");
-let addedRows = 0;
-let totalRows = 0;
 //Initialized data object to be filled after the fetch has returned
-let data = "";
+let tableData = "";
 
 
 //This fetch grabs all of the data for the page. then draws the table with the information.
 fetch("./transactionsJson")
 .then(response => response.json())
 .then(jsonData => {
-    
-    data = jsonData; //Pass queried data back to the rest of the page
-    let displayColumnsStartIdx = 4; //query has all the id's in the front but i don't want to display them
-    let headings = Object.keys(jsonData.transactions[0]);
-    let tableHTML = "";
 
-    tableHTML += "<tr>\n";
-    for(let i = displayColumnsStartIdx; i < headings.length; i++) {
-        tableHTML += `<th>${headings[i]}</th>\n`;
-    }
-    tableHTML += `<th>Actions</th>\n`;
-    tableHTML += "</tr>\n";
+    //tableData = new transactionTable(jsonData);
 
-    document.querySelector("thead").innerHTML = tableHTML;
-    tableHTML = "";
+    let tableTest = new htmlTable(
+        document.querySelector("table"),
+        ["First One","Second One","Third One"],
+        [[1,2,3],[4,5,6],[7,8,9]]
+    );
 
-    for(let i = 0; i < jsonData.transactions.length; i++) {
-        totalRows++;
-        tableHTML += `<tr class="row" id="row_${jsonData.transactions[i].transactionID}">\n`; //TODO: PICKUP HERE: maybe turn this into a method so i can use it again later. then when submitting a row it will update nicely and it fixes duplicate code with the setRow()
-        for(let j = displayColumnsStartIdx; j < headings.length; j++) {
-            rowData = jsonData.transactions[i][headings[j]];
+    console.log(jsonData);
 
-            if(typeof rowData == "number") //Switch all the number values to currency.
-                rowData = rowData.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
-            else if(headings[j] == "transactionDate") //Modify the date value to remove the time 
-                rowData = rowData.substr(0,10); //TODO: switch to date object.
-            else if(rowData == null)
-                rowData = "";
-
-                tableHTML += `<td>${rowData}</td>\n`;
-        }
-        
-        tableHTML += `
-            <td><input type="button" value="Edit" class="edit" onclick="editRow(${jsonData.transactions[i].transactionID})"></td>
-            </tr>\n`;
-    }
-
-    table.innerHTML = tableHTML;
 });
 
+//TODO: unused. but could be the beginning of a new add row.
+function addStaticRow(rowID, wholeRowData){
+    totalRows++;
+    let tableHTML = `<tr class="row" id="row_${rowID}">\n`; 
+    wholeRowData.forEach(rowData => {
+
+        if(typeof rowData == "number") //Switch all the number values to currency.
+            rowData = rowData.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
+        else if(rowData.constructor === Date)
+            rowData = rowData.toDateString();
+        else if(rowData == null)
+            rowData = "";
+
+            tableHTML += `<td>${rowData}</td>\n`;
+    });
+    
+    tableHTML += `
+        <td><input type="button" value="Edit" class="edit" onclick="editRow(${rowID})"></td>
+        </tr>\n`;
+    table.innerHTML += tableHTML;
+}
 //Add row click event. Using the json data from the database it populates all the dropdowns.
 function addRow() {
     totalRows++;
@@ -97,7 +88,7 @@ function drawTableRow(rowID){
 function vendorSwapInput(rowID){
     let vendorSelect = document.querySelector(`#row_${rowID} .vendor`)
     if(vendorSelect.value == "new"){
-        vendorSelect.insertAdjacentHTML("afterend", `<input class="vendor">`);
+        vendorSelect.insertAdjacentHTML("afterend", `<input class="vendor" size=15>`);
         vendorSelect.remove();
     }
 }
@@ -178,6 +169,67 @@ function submitRow(rowID){
 
 function submitAll(){
     console.log("submit all button works");
+    //TODO: need a submit all button. refresh the whole table when clicked
 }
 
-//TODO: need a submit all button. refresh the whole table when clicked
+
+
+class transactionTable {
+
+    #table;
+    #rows = [];
+    constructor(jsonData) {
+        this.#table = document.querySelector("table");
+        this.#table.innerHTML = "<thead></thead>\n<tbody></tbody>";
+    }
+}
+
+class htmlTable {
+    #table
+    #rows = [];
+    constructor(tableElement, tableHeadings, tableData) {
+        this.#table = tableElement;
+        this.#table.innerHTML = "<thead></thead>\n<tbody></tbody>";
+
+        this.#addHeading(tableHeadings);
+        this.#addTableData(tableData);
+    }
+
+    #addHeading(tableStringHeadings){
+        let tableHeading = document.querySelector("thead");
+        let headingHTML = ""
+        headingHTML += "<tr>";
+
+        tableStringHeadings.forEach(heading => {
+            headingHTML += `<th>${heading}</th>`; 
+        });
+
+        headingHTML += "</tr>";
+
+        tableHeading.innerHTML = headingHTML;
+    }
+
+    #addRow(tableStringData){
+        let tableBody = document.querySelector("tbody");
+        let bodyHTML = ""
+        bodyHTML += `<tr id="row_${this.#rows.length}">`;
+
+        tableStringData.forEach(data => {
+            bodyHTML += `<td>${data}</td>`;
+        });
+
+        bodyHTML += "</tr>";
+
+        tableBody.innerHTML += bodyHTML;
+        this.#rows.push(tableStringData);
+    }
+
+    #addTableData(tableData){
+        for(const rowData in tableData){
+            this.#addRow(tableData[rowData]);
+        }
+    }
+
+
+
+}
