@@ -176,4 +176,8 @@ function submitRow(rowID){
     });
 }
 
+function submitAll(){
+    console.log("submit all button works");
+}
+
 //TODO: need a submit all button. refresh the whole table when clicked
