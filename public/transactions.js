@@ -9,7 +9,7 @@ fetch("./transactionsJson")
 
     //tableData = new transactionTable(jsonData);
 
-    let tableTest = new htmlTable(
+    let transactionTable = new htmlTable(
         document.querySelector("table"),
         ["First One","Second One","Third One"],
         [[1,2,3],[4,5,6],[7,8,9]]
@@ -174,7 +174,7 @@ function submitAll(){
 
 
 
-class transactionTable {
+class TransactionTable {
 
     #table;
     #rows = [];
@@ -187,16 +187,18 @@ class transactionTable {
 class htmlTable {
     #table
     #rows = [];
+    #headings = [];
     constructor(tableElement, tableHeadings, tableData) {
         this.#table = tableElement;
         this.#table.innerHTML = "<thead></thead>\n<tbody></tbody>";
 
-        this.#addHeading(tableHeadings);
-        this.#addTableData(tableData);
+        this.#addHeadings(tableHeadings);
+        this.#addRowData(tableData);
+        this.#createTable();
     }
 
-    #addHeading(tableStringHeadings){
-        let tableHeading = document.querySelector("thead");
+    #printHeading(tableStringHeadings){ 
+        let tableHeading = this.#table.querySelector("thead");
         let headingHTML = ""
         headingHTML += "<tr>";
 
@@ -209,27 +211,40 @@ class htmlTable {
         tableHeading.innerHTML = headingHTML;
     }
 
-    #addRow(tableStringData){
-        let tableBody = document.querySelector("tbody");
+    #printRow(rowID){
+        let tableBody = this.#table.querySelector("tbody");
         let bodyHTML = ""
-        bodyHTML += `<tr id="row_${this.#rows.length}">`;
+        bodyHTML += `<tr id="row_${rowID}">`;
 
-        tableStringData.forEach(data => {
+        this.#rows[rowID].forEach(data => {
             bodyHTML += `<td>${data}</td>`;
         });
 
         bodyHTML += "</tr>";
 
         tableBody.innerHTML += bodyHTML;
-        this.#rows.push(tableStringData);
     }
 
-    #addTableData(tableData){
-        for(const rowData in tableData){
-            this.#addRow(tableData[rowData]);
+    #createTable(){
+        this.#printHeading(this.#headings);
+        for(let rowID = 0; rowID < this.#rows.length; rowID++){
+            this.#printRow(rowID);
         }
     }
 
+    #addHeadings(tableStringHeadings){
+        this.#headings = tableStringHeadings;
+    }
 
+    #addRowData(rowData){
+        rowData.forEach(row => {
+            let newRow = [];
+            
+            row.forEach(column => {
+                newRow.push(column);
+            });
+            this.#rows.push(newRow);
+        });
+    }
 
 }
