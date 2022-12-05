@@ -1,5 +1,5 @@
 //Initialized data object to be filled after the fetch has returned
-let tableData = "";
+let transactionTable = "";
 
 
 //This fetch grabs all of the data for the page. then draws the table with the information.
@@ -7,15 +7,7 @@ fetch("./transactionsJson")
 .then(response => response.json())
 .then(jsonData => {
 
-    //tableData = new transactionTable(jsonData);
-
-    let transactionTable = new htmlTable(
-        document.querySelector("table"),
-        ["First One","Second One","Third One"],
-        [[1,2,3],[4,5,6],[7,8,9]]
-    );
-
-    console.log(jsonData);
+    transactionTable = new TransactionTable(document.querySelector("table"), jsonData);
 
 });
 
@@ -41,9 +33,13 @@ function addStaticRow(rowID, wholeRowData){
     table.innerHTML += tableHTML;
 }
 //Add row click event. Using the json data from the database it populates all the dropdowns.
-function addRow() {
-    totalRows++;
-    table.querySelector("tr").insertAdjacentHTML("beforebegin", drawTableRow(totalRows)); //FIXME: adds the wrong rowID to the row. going by transaction id might fix it? or actually just reverse the row id's from top to bottom
+// function addRow() {
+//     totalRows++;
+//     table.querySelector("tr").insertAdjacentHTML("beforebegin", drawTableRow(totalRows)); //FIXME: adds the wrong rowID to the row. going by transaction id might fix it? or actually just reverse the row id's from top to bottom
+// }
+
+function addRow(){
+
 }
 
 function drawTableRow(rowID){
@@ -174,77 +170,26 @@ function submitAll(){
 
 
 
-class TransactionTable {
+class TransactionTable extends htmlTable{ //TODO: when printing data to table used the transaction id's as the row and <td> id's
+    #transactionIDs = [];
+    colsToHide = 4;
+    constructor(tableElement, jsonData) {
+        let tableData = [];
 
-    #table;
-    #rows = [];
-    constructor(jsonData) {
-        this.#table = document.querySelector("table");
-        this.#table.innerHTML = "<thead></thead>\n<tbody></tbody>";
-    }
-}
+        let headings = Object.keys(jsonData.transactions[0]).slice(4);
+        headings.push("Actions");
 
-class htmlTable {
-    #table
-    #rows = [];
-    #headings = [];
-    constructor(tableElement, tableHeadings, tableData) {
-        this.#table = tableElement;
-        this.#table.innerHTML = "<thead></thead>\n<tbody></tbody>";
+        tableData = jsonData.transactions.map(t => Object.entries(t).map(d => d[1]).slice(4)); //Really ugly but it converts an array of objects into an array of arrays and cuts off te first 4 values
+        tableData.unshift(headings);
+        
+        super(
+            tableElement,
+            tableData
+            );
 
-        this.#addHeadings(tableHeadings);
-        this.#addRowData(tableData);
-        this.#createTable();
-    }
-
-    #printHeading(tableStringHeadings){ 
-        let tableHeading = this.#table.querySelector("thead");
-        let headingHTML = ""
-        headingHTML += "<tr>";
-
-        tableStringHeadings.forEach(heading => {
-            headingHTML += `<th>${heading}</th>`; 
-        });
-
-        headingHTML += "</tr>";
-
-        tableHeading.innerHTML = headingHTML;
-    }
-
-    #printRow(rowID){
-        let tableBody = this.#table.querySelector("tbody");
-        let bodyHTML = ""
-        bodyHTML += `<tr id="row_${rowID}">`;
-
-        this.#rows[rowID].forEach(data => {
-            bodyHTML += `<td>${data}</td>`;
-        });
-
-        bodyHTML += "</tr>";
-
-        tableBody.innerHTML += bodyHTML;
-    }
-
-    #createTable(){
-        this.#printHeading(this.#headings);
-        for(let rowID = 0; rowID < this.#rows.length; rowID++){
-            this.#printRow(rowID);
-        }
-    }
-
-    #addHeadings(tableStringHeadings){
-        this.#headings = tableStringHeadings;
-    }
-
-    #addRowData(rowData){
-        rowData.forEach(row => {
-            let newRow = [];
-            
-            row.forEach(column => {
-                newRow.push(column);
-            });
-            this.#rows.push(newRow);
-        });
+        let idHeadings = Object.keys(jsonData.transactions[0]).slice(0,4);
+        this.#transactionIDs = jsonData.transactions.map(t => Object.entries(t).map(d => d[1]).slice(0,4));
+        this.#transactionIDs.unshift(idHeadings);
     }
 
 }
