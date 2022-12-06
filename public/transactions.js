@@ -172,6 +172,7 @@ function submitAll() {
 
 class TransactionTable extends htmlTable {
     #transactionIDs = [];
+    #notsurewhattocallit;
     colsToHide = 4;
     constructor(tableElement, jsonData) {
         let tableData = [];
@@ -183,13 +184,18 @@ class TransactionTable extends htmlTable {
         tableData.map(row => row[0] = new Date(row[0])); //Sets all the date rows as a date object
         tableData.unshift(headings);
 
-
-
         super(tableElement, tableData, false);
 
         let idHeadings = Object.keys(jsonData.transactions[0]).slice(0, 4);
         this.#transactionIDs = jsonData.transactions.map(t => Object.entries(t).map(d => d[1]).slice(0, 4)); //Same thing as above but grabs the other part of the array
         this.#transactionIDs.unshift(idHeadings);
+
+        
+        this.#notsurewhattocallit = {
+            categories: jsonData.categories,
+            accounts: jsonData.accounts,
+            vendors: jsonData.vendors
+        }
 
         this._printTable();
     }
@@ -197,7 +203,7 @@ class TransactionTable extends htmlTable {
     _printRow(rowID) {
         let tableBody = this._table.querySelector("tbody");
         let bodyHTML = "";
-        bodyHTML += `<tr id="row_${rowID}">`;
+        bodyHTML += `<tr>`;
 
         this._rows[rowID].forEach(data => {
             
@@ -233,8 +239,64 @@ class TransactionTable extends htmlTable {
         });
     }
 
+    #addDataToEditableRow(){
+        //TODO: PICKUP HERE - not sure where this would be called
+    }
+
+    #makeEditableRow(rowElement){
+        let cells = rowElement.querySelectorAll("td");
+        cells.forEach((cell, index) => {
+            let inputElement = "";
+            switch (index) {
+                case 0:
+                    inputElement = `<input type="date">`;
+                    break;
+                case 1:
+                    inputElement = `<input size=10>`;
+                    break;
+                case 2:
+                case 3:
+                case 4:
+                    inputElement = this.#createDropdown(Object.values(this.#notsurewhattocallit)[index-2], this._rows[0][index]);
+                    break;
+                case 6:
+                    inputElement = `<input type="button" value="Save">\n<input type="button" value="Discard">`;
+                    break;
+                default:
+                    inputElement = `<input>`;
+                    break;
+            }
+
+            cell.innerHTML = inputElement;
+        });
+    }
+
     #addEventListeners(){
-        document.querySelectorAll(".edit"); //TODO: PICKUP HERE - working on adding eventListeners to all the buttons
+        let editButtons = document.querySelectorAll(".edit");
+
+        editButtons.forEach(button => {
+            button.addEventListener("click", event => {
+                this.#makeEditableRow(event.path[2]);
+            });
+        });
+
+        document.querySelector("#addRow").addEventListener("click", event => {
+            this.addRow();
+            this.#makeEditableRow([...document.querySelectorAll("tr")].pop());
+        });
+    }
+
+    #createDropdown(typeObj, name){
+        let dropdownHtml = `
+        <select>
+            <option value=""> -- Select a ${name} -- </option>`;
+
+        typeObj.forEach(object => {
+            dropdownHtml += `<option value="${object.id}">${object.name}</option>`;
+        });
+
+        dropdownHtml += "</select>";
+        return dropdownHtml;
     }
 
 
