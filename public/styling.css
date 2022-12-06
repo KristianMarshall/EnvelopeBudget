@@ -79,3 +79,7 @@ footer{
 .selected {
     background-color: rgb(145, 145, 145);
 }
+
+#transactionsTable td:nth-child(1), #transactionsTable td:nth-child(2) {
+    text-align: right;
+}

@@ -12,12 +12,13 @@ pageLinks.forEach(link =>{
 class htmlTable {
     _table;
     _rows = [];
-    constructor(tableElement, tableData) {
+    constructor(tableElement, tableData, printTable = true) {
         this._table = tableElement;
 
         this._addHeadings(tableData[0]);
         this._addRowData(tableData.slice(1));
-        this._createTable();
+        if(printTable)
+            this._printTable();
     }
 
     _printHeading(){ 
@@ -48,7 +49,7 @@ class htmlTable {
         tableBody.innerHTML += bodyHTML;
     }
 
-    _createTable(){
+    _printTable(){
         this._table.innerHTML = "<thead></thead>\n<tbody></tbody>";
         this._printHeading();
 
@@ -82,7 +83,7 @@ class htmlTable {
         }
 
         this._rows.push(rowData);
-        this._createTable();
+        this._printTable();
     }
 
 }
