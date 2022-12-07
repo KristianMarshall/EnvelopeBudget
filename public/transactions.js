@@ -239,8 +239,18 @@ class TransactionTable extends htmlTable {
         });
     }
 
-    #addDataToEditableRow(){
-        //TODO: PICKUP HERE - not sure where this would be called
+    #addDataToEditableRow(rowElement){
+        let rowID = rowElement.rowIndex;
+        let dataToAdd = [
+            this._rows[rowID][0].toLocaleDateString("en-CA"), //date
+            this._rows[rowID][1],                           //amount
+            this.#transactionIDs[rowID][1],                 //category
+            this.#transactionIDs[rowID][2],                 //account
+            this.#transactionIDs[rowID][3],                 //vendor
+            this._rows[rowID][5]                            //memo
+        ]
+        for(let colIdx = 0; colIdx < dataToAdd.length; colIdx++)
+            rowElement.querySelectorAll("td")[colIdx].querySelector("*").value = dataToAdd[colIdx];
     }
 
     #makeEditableRow(rowElement){
@@ -269,6 +279,8 @@ class TransactionTable extends htmlTable {
 
             cell.innerHTML = inputElement;
         });
+
+        //TODO: PICKUP Here: add event listeners for save and discard buttons
     }
 
     #addEventListeners(){
@@ -276,7 +288,9 @@ class TransactionTable extends htmlTable {
 
         editButtons.forEach(button => {
             button.addEventListener("click", event => {
-                this.#makeEditableRow(event.path[2]);
+                let tableRowElement = event.path[2];
+                this.#makeEditableRow(tableRowElement);
+                this.#addDataToEditableRow(tableRowElement);
             });
         });
 
