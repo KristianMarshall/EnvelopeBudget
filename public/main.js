@@ -80,11 +80,11 @@ class htmlTable {
         });
     }
 
-    addRow(rowData){
+    _addRow(rowData){
         if(rowData === undefined){
             rowData = [];
             for (let i = 0; i < this._rows[0].length; i++)
-                rowData.push('');
+                rowData.push(''); //TODO: should probably switch to null
         }
 
         this._rows.push(rowData);
