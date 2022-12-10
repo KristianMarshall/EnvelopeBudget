@@ -1,13 +1,15 @@
 //Stuff to run on every page
+window.addEventListener("load", event => {
 
 
-//Highlights the current page in the navbar
-let pageLinks = document.querySelectorAll("#navbar a");
-
-pageLinks.forEach(link =>{
-    if(document.title.includes(link.id))
-        link.classList.add("selected");
-});
+    //Highlights the current page in the navbar
+    let pageLinks = document.querySelectorAll("#navbar a");
+    
+    pageLinks.forEach(link =>{
+        if(document.title.includes(link.id))
+            link.classList.add("selected");
+    });
+    });
 
 class htmlTable {
     _table;
@@ -37,16 +39,19 @@ class htmlTable {
 
     _printRow(rowID){
         let tableBody = this._table.querySelector("tbody");
-        let bodyHTML = "";
-        bodyHTML += `<tr id="row_${rowID}">`;
+        let rowHTML = "";
+        rowHTML += `<tr>`;
 
         this._rows[rowID].forEach(data => {
-            bodyHTML += `<td>${data}</td>`;
+            rowHTML += `<td>${data}</td>`;
         });
 
-        bodyHTML += "</tr>";
+        rowHTML += "</tr>";
 
-        tableBody.innerHTML += bodyHTML;
+        if(tableBody.lastChild == null)
+            tableBody.innerHTML += rowHTML; //calls to innerHTML overwrite the whole tbody including event listeners
+        else
+            tableBody.lastChild.insertAdjacentHTML("afterend", rowHTML);
     }
 
     _printTable(){
@@ -62,7 +67,7 @@ class htmlTable {
         this._rows.push(tableStringHeadings);
     }
 
-    //adds a row to the classes row data. if the inputted data is shorted it gets padded with null
+    //adds a row to the classes row data. if the inputted data is shorter it gets padded with null
     _addRowData(rowData){
         rowData.forEach(row => {
             let newRow = [];
@@ -83,7 +88,7 @@ class htmlTable {
         }
 
         this._rows.push(rowData);
-        this._printTable();
+        this._printRow(this._rows.length-1);
     }
 
 }

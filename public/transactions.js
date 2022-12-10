@@ -190,7 +190,11 @@ class TransactionTable extends htmlTable {
         this.#transactionIDs = jsonData.transactions.map(t => Object.entries(t).map(d => d[1]).slice(0, 4)); //Same thing as above but grabs the other part of the array
         this.#transactionIDs.unshift(idHeadings);
 
-        
+        jsonData.vendors.unshift({
+            id: "addNew",
+            name: "-- Add New --" //adds the add new option to the vendor dropdown
+        });
+
         this.#notsurewhattocallit = {
             categories: jsonData.categories,
             accounts: jsonData.accounts,
@@ -198,12 +202,16 @@ class TransactionTable extends htmlTable {
         }
 
         this._printTable();
+        document.querySelector("#addRow").addEventListener("click", event => {
+            this.addRow();
+            this.#makeEditableRow([...document.querySelectorAll("tr")].pop());
+        });
     }
 
     _printRow(rowID) {
         let tableBody = this._table.querySelector("tbody");
-        let bodyHTML = "";
-        bodyHTML += `<tr>`;
+        let rowHTML = "";
+        rowHTML += `<tr>`;
 
         this._rows[rowID].forEach(data => {
             
@@ -215,12 +223,23 @@ class TransactionTable extends htmlTable {
             else if (data.constructor === Date)
                 data = data.toDateString();
 
-            bodyHTML += `<td>${data}</td>`;      
+            rowHTML += `<td>${data}</td>`;      
         });
 
-        bodyHTML += "</tr>";
+        rowHTML += "</tr>";
 
-        tableBody.innerHTML += bodyHTML;
+        //If no rows just add the row in the inner html. otherwise if its a new row append it to the end. lastly if its replacing
+        //          a row add it after then remove it
+        if(tableBody.rows.length == 0)
+            tableBody.innerHTML += rowHTML; //calls to innerHTML overwrite the whole tbody including event listeners
+        else{
+            if(rowID >= tableBody.rows.length+1)
+                tableBody.lastChild.insertAdjacentHTML("afterend", rowHTML);
+            else{
+                tableBody.rows[rowID-1].insertAdjacentHTML("afterend", rowHTML);
+                tableBody.rows[rowID-1].remove();
+            }
+        }
     }
 
     _printTable(){
@@ -241,12 +260,13 @@ class TransactionTable extends htmlTable {
 
     #addDataToEditableRow(rowElement){
         let rowID = rowElement.rowIndex;
+        let vendor = this.#transactionIDs[rowID][3] === null ? "" : this.#transactionIDs[rowID][3]; //If its null make it equal a space because that will set it to select a vendor in the drop down
         let dataToAdd = [
             this._rows[rowID][0].toLocaleDateString("en-CA"), //date
             this._rows[rowID][1],                           //amount
             this.#transactionIDs[rowID][1],                 //category
             this.#transactionIDs[rowID][2],                 //account
-            this.#transactionIDs[rowID][3],                 //vendor
+            vendor,                                         //vendor
             this._rows[rowID][5]                            //memo
         ]
         for(let colIdx = 0; colIdx < dataToAdd.length; colIdx++)
@@ -280,7 +300,25 @@ class TransactionTable extends htmlTable {
             cell.innerHTML = inputElement;
         });
 
-        //TODO: PICKUP Here: add event listeners for save and discard buttons
+
+        //Event listener for the vendor dropdown
+        cells[4].lastChild.addEventListener("change", event => {
+            if(event.target.value === "addNew"){
+                event.target.insertAdjacentHTML("afterend", "<input size=15>");
+                event.target.remove();
+            }
+        })
+
+        //event listener for the discard button
+        cells[cells.length-1].lastChild.addEventListener("click", event => {
+            this._printRow(rowElement.rowIndex);
+        })
+
+        //event listener for the save button
+        cells[cells.length-1].firstChild.addEventListener("click", event => {
+            console.log("save button pressed"); //TODO: add a submit to database function
+        })
+
     }
 
     #addEventListeners(){
@@ -294,10 +332,7 @@ class TransactionTable extends htmlTable {
             });
         });
 
-        document.querySelector("#addRow").addEventListener("click", event => {
-            this.addRow();
-            this.#makeEditableRow([...document.querySelectorAll("tr")].pop());
-        });
+        
     }
 
     #createDropdown(typeObj, name){
