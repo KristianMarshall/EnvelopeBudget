@@ -1,20 +1,24 @@
 <%- include('./partials/header', { title: "Transactions - EB" }); %>
+<div class="page">
+    <div id="leftbar">
+        <h3>Account Balances</h3>
+        <div id="AB"></div>
+    </div>
+    <div id="content">
+        <input type="button" value="Add Row" id="addRow">
+        <input type="button" value="Submit All" id="submitAll">
+        <table id="transactionsTable">
+            <thead>
+                <tr>
+                    <th>Still Loading</th> 
+                </tr>
+            </thead>
+            <tbody>
 
-<h2>Transactions</h2>
-
-<input type="button" value="Add Row" onclick="addRow()">
-<input type="button" value="Submit All" onclick="submitAll()">
-<table>
-    <thead>
-        <tr>
-            <th>Still Loading</th> 
-        </tr>
-    </thead>
-    <tbody>
-
-    </tbody>
-</table>
-
+            </tbody>
+        </table>
+    </div>
+</div>
 <script type="text/javascript" src="/transactions.js"></script>
 
 <%- include('./partials/footer'); %>

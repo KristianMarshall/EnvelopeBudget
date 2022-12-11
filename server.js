@@ -27,9 +27,9 @@ app.get('/TransactionsJson', (req, res) => {
   });
 
   let transactionsQuery = querySql("SELECT * FROM Transactions");
-  let categoriesQuery = querySql("SELECT categoryID, categoryName FROM category");
-  let accountsQuery = querySql("SELECT accountID, accountName FROM BudgetTest.account");
-  let vendorsQuery = querySql("SELECT * FROM vendor");
+  let categoriesQuery = querySql("SELECT categoryID as id, categoryName as name FROM category");
+  let accountsQuery = querySql("SELECT accountID as id, accountName as name FROM BudgetTest.account");
+  let vendorsQuery = querySql("SELECT vendorID as id, vendorName as name FROM vendor");
 
   Promise.all([transactionsQuery, categoriesQuery, accountsQuery, vendorsQuery])
   .then(queriesData =>{
@@ -50,7 +50,7 @@ app.get('/CategoryTransfers', (req, res) => {
 });
 
 app.get('/categoryTransfersJson', (req, res) => {
-  let con = mysql.getCon();
+  let con = mysql.getCon(); //TODO: should use the sqlQuery function
 
   con.connect(function (error) {
     if (error) {
@@ -67,7 +67,7 @@ app.get('/categoryTransfersJson', (req, res) => {
 });
 
 app.get('/AccountBalanceJson', (req, res) => {
-  let con = mysql.getCon();
+  let con = mysql.getCon(); //TODO: should use the sqlQuery function
 
   con.connect(function (error) {
     if (error) {
@@ -84,7 +84,7 @@ app.get('/AccountBalanceJson', (req, res) => {
 });
 
 app.get('/DashboardJson', (req, res) => {
-  let con = mysql.getCon();
+  let con = mysql.getCon(); //TODO: should use the sqlQuery function
   
   con.connect(function (error) {
     if (error) {
@@ -117,7 +117,7 @@ app.post('/transactionSubmitJson', (req, res) => {
   console.log(req.body);
   
   let query = "";
-  if(req.body.transactionID != null)
+  if(req.body.transactionIDs[0] != null)
     query = `
     UPDATE transaction
     SET transactionDate = ?, transactionAmt = ?, categoryID = ?, accountID = ?, vendorID = ?, transactionMemo = ?
@@ -126,13 +126,13 @@ app.post('/transactionSubmitJson', (req, res) => {
     query = "";
 
   let safeQuery = mysql.functions.format(query, [
-    req.body.transactionDate, 
-    req.body.transactionAmt, 
-    req.body.categoryID, 
-    req.body.accountID, 
-    req.body.vendorID, //FIXME: if any of these are null the query fails
-    req.body.transactionMemo, 
-    req.body.transactionID
+    req.body.rowData[0], 
+    req.body.rowData[1], 
+    req.body.transactionIDs[1], 
+    req.body.transactionIDs[2], 
+    req.body.transactionIDs[3], //TODO: error checking
+    req.body.rowData[5], 
+    req.body.transactionIDs[0]
   ]);
 
   querySql(safeQuery).then(result => {
@@ -160,7 +160,8 @@ function querySql(sql) {
   return new Promise((resolve, reject) => {
       con.query(sql, (error, sqlResult) => {
           if(error) {
-              return reject(error);
+            console.log(error);  //WAS: return reject(error);
+            return resolve(error);
           }           
 
           return resolve(sqlResult);
