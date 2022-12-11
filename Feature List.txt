@@ -1,0 +1,10 @@
+Things i want to get done before creating video
+
+    - add more data
+    - pretty up category transfers page
+    - add row adds rows to the top
+
+Future Things
+
+    - Bootstrap to pretty it up
+    - quick add on dashboard for category transfers

@@ -104,9 +104,9 @@ app.get('/githubPull', (req, res) => {
       //some err occurred
       console.error(err)
     } else {
-    // the *entire* stdout and stderr (buffered)
-    console.log(`stdout: ${stdout}`);
-    console.log(`stderr: ${stderr}`);
+      // the *entire* stdout and stderr (buffered)
+      console.log(`stdout: ${stdout}`);
+      console.log(`stderr: ${stderr}`);
     }
     res.redirect('/');
   });
@@ -114,36 +114,15 @@ app.get('/githubPull', (req, res) => {
 
 app.post('/transactionSubmitJson', (req, res) => {
 
-  let sqlData = [
-    req.body.rowData[0],        //Date
-    req.body.rowData[1],        //Amount
-    req.body.transactionIDs[1], //Id of Category
-    req.body.transactionIDs[2], //Id of Account
-    req.body.transactionIDs[3], //Id of Vendor
-    req.body.rowData[5],        //Memo
-    req.body.transactionIDs[0]
-  ];
-  
-  let query = "";
-
-
-  if(req.body.transactionIDs[0] != null)
-    query = `
-    UPDATE transaction
-    SET transactionDate = ?, transactionAmt = ?, categoryID = ?, accountID = ?, vendorID = ?, transactionMemo = ?
-    WHERE transactionID = ?`;
-  else{
-    query = `INSERT INTO transaction VALUES
-            (0, ?, ?, ?, ?, ?, ?, DEFAULT)`;
-    sqlData.pop();
-  }
-
-  let safeQuery = mysql.functions.format(query, sqlData);
-
-  querySql(safeQuery).then(result => {
+  //if a new vendor was added we need to add it to the database before adding/updating the transaction
+  if(req.body.transactionIDs[3] === -1){
+    querySql(mysql.functions.format(`INSERT INTO vendor VALUES (0, ?)`, [req.body.rowData[4]]))
+    .then(result => {
       console.log(result);
-      res.json(result);
-  });
+      updateOrAddTransaction(res, req, result);
+    });
+  } else 
+    updateOrAddTransaction(res, req);
   
 });
 
@@ -173,5 +152,41 @@ function querySql(sql) {
       });
 
       con.end();
+  });
+}
+
+function updateOrAddTransaction(res, req , vendorAddResult){
+
+  //if a new vendor was added set the vendor id to the new id
+  let vendorId = vendorAddResult === undefined ? req.body.transactionIDs[3] : vendorAddResult.insertId;
+
+  let sqlData = [
+    req.body.rowData[0],        //Date
+    req.body.rowData[1],        //Amount
+    req.body.transactionIDs[1], //Id of Category
+    req.body.transactionIDs[2], //Id of Account
+    vendorId,                   //Id of Vendor
+    req.body.rowData[5],        //Memo
+    req.body.transactionIDs[0]  // Transaction Id
+  ];
+  
+  let query = "";
+
+  if(req.body.transactionIDs[0] !== null)
+    query = `
+    UPDATE transaction
+    SET transactionDate = ?, transactionAmt = ?, categoryID = ?, accountID = ?, vendorID = ?, transactionMemo = ?
+    WHERE transactionID = ?`;
+  else{
+    query = `INSERT INTO transaction VALUES
+            (0, ?, ?, ?, ?, ?, ?, DEFAULT)`;
+    sqlData.pop();
+  }
+
+  let safeQuery = mysql.functions.format(query, sqlData);
+
+  querySql(safeQuery).then(result => {
+      console.log(result);
+      res.json({transactionResult: result, vendorResult: vendorAddResult});
   });
 }

@@ -107,6 +107,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
                 this.#addDataToEditableRow(tableRowElement);
             });
 
+            //TODO: need to center these buttons
             deleteButton.addEventListener("click", event => {
                 event.target.insertAdjacentHTML("afterend", `<input id="cancel" type="button" value="Cancel"><input id="confirm" type="button" value="Confirm">`);
                 event.target.parentElement.querySelector("#cancel").addEventListener("click", event => {
@@ -140,15 +141,27 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         let cells = rowElement.querySelectorAll("td");
 
         this._rows[rowElement.rowIndex][0] = new Date(cells[0].lastChild.value + "T05:00:00.000Z");
-        this._rows[rowElement.rowIndex][1] = Number(cells[1].lastChild.value);
+        this._rows[rowElement.rowIndex][1] = Number(cells[1].lastChild.value); //Amount
 
-        for (let dropdown = 1; dropdown < 4; dropdown++) {
+        //This pulls the data in from Category and Account
+        for (let dropdown = 1; dropdown < 3; dropdown++) {
             let id = Number(cells[dropdown + 1].lastChild.value)
             this.#transactionIDs[rowElement.rowIndex][dropdown] = id == 0 ? null : id;
 
             let name = cells[dropdown + 1].lastChild.selectedOptions[0].innerHTML;
             this._rows[rowElement.rowIndex][dropdown + 1] = id == 0 ? null : name;
         }
+
+        let idOrValue = cells[4].lastChild.value;
+        //If its a new vendor or a current one as we need to save them differently
+        if(isNaN(idOrValue)){
+            this._rows[rowElement.rowIndex][4] = cells[4].lastChild.value;
+            this.#transactionIDs[rowElement.rowIndex][3] = -1; //Signals to the backend to create a vendor for this entry
+        } else {
+            this._rows[rowElement.rowIndex][4] = idOrValue !== "" ? cells[4].lastChild.selectedOptions[0].innerHTML : null;
+            this.#transactionIDs[rowElement.rowIndex][3] = idOrValue !== "" ? Number(cells[4].lastChild.value) : null;
+        }
+
         let memo = cells[5].lastChild.value;
         this._rows[rowElement.rowIndex][5] = memo == "" ? null : memo;
     }
@@ -253,6 +266,14 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             .then(response => response.json())
             .then(result => {
                 console.log(result); //TODO: error check
+
+                //if a vendor was added then add the new vendor to the local array of vendors
+                if(result.vendorResult !== undefined){
+                    this.#transactionIDs[rowID][3] = result.vendorResult.insertId;
+                    this.#notsurewhattocallit.vendors.push({id: result.vendorResult.insertId, name: this._rows[rowID][4]});
+                }
+
+                //Update the account balances in left bar
                 fetch("/AccountBalanceJson").then(response => response.json())
                 .then(accountJson => {drawAccountBalances(accountJson)});
             });
@@ -271,6 +292,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         return dropdownHtml;
     }
 
+    //TODO: should default date to today
     _addRow(rowData) {
         super._addRow(rowData);
 
