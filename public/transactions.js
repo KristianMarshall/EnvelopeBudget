@@ -19,6 +19,10 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
     #transactionIDs = [];
     #notsurewhattocallit;
     colsToHide = 4;
+    #actionButtons = `
+        <input type="button" value="Edit" class="edit">
+        <input type="button" value="Delete" class="delete">
+        `;
     constructor(tableElement, jsonData) {
         let tableData = [];
 
@@ -94,12 +98,24 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         }
 
         let editButton = document.querySelectorAll("tr")[rowID].querySelector(".edit");
+        let deleteButton = document.querySelectorAll("tr")[rowID].querySelector(".delete");
         //if a new row is added it will be blank and imminently switched to an editable row so the buttons aren't needed
         if (editButton != null) {
             editButton.addEventListener("click", event => {
                 let tableRowElement = event.path[2];
                 this.#makeEditableRow(tableRowElement);
                 this.#addDataToEditableRow(tableRowElement);
+            });
+
+            deleteButton.addEventListener("click", event => {
+                event.target.insertAdjacentHTML("afterend", `<input id="cancel" type="button" value="Cancel"><input id="confirm" type="button" value="Confirm">`);
+                event.target.parentElement.querySelector("#cancel").addEventListener("click", event => {
+                    console.log("cancel button " + rowID); //TODO: make the cancel button do something
+                });
+                event.target.parentElement.querySelector("#confirm").addEventListener("click", event => {
+                    console.log("confirm button " + rowID); //TODO: make the confirm button do something
+                });
+                event.target.remove();
             });
         }
 
@@ -127,11 +143,14 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         this._rows[rowElement.rowIndex][1] = Number(cells[1].lastChild.value);
 
         for (let dropdown = 1; dropdown < 4; dropdown++) {
-            this._rows[rowElement.rowIndex][dropdown + 1] = cells[dropdown + 1].lastChild.selectedOptions[0].innerHTML; //TODO: error checking
-            this.#transactionIDs[rowElement.rowIndex][dropdown] = Number(cells[dropdown + 1].lastChild.value);
-        }
+            let id = Number(cells[dropdown + 1].lastChild.value)
+            this.#transactionIDs[rowElement.rowIndex][dropdown] = id == 0 ? null : id;
 
-        this._rows[rowElement.rowIndex][5] = cells[5].lastChild.value;
+            let name = cells[dropdown + 1].lastChild.selectedOptions[0].innerHTML;
+            this._rows[rowElement.rowIndex][dropdown + 1] = id == 0 ? null : name;
+        }
+        let memo = cells[5].lastChild.value;
+        this._rows[rowElement.rowIndex][5] = memo == "" ? null : memo;
     }
 
     #makeEditableRow(rowElement) {
@@ -140,25 +159,34 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             let inputElement = "";
             switch (index) {
                 case 0:
-                    inputElement = `<input type="date">`;
+                    inputElement = `<input type="date" class="rowInput">`;
                     break;
                 case 1:
-                    inputElement = `<input size=10>`;
+                    inputElement = `<input size=10 class="rowInput">`;
                     break;
                 case 2:
                 case 3:
                 case 4:
                     inputElement = this.#createDropdown(Object.values(this.#notsurewhattocallit)[index - 2], this._rows[0][index]);
                     break;
-                case 6:
-                    inputElement = `<input type="button" value="Save">\n<input type="button" value="Discard">`;
+                case 5:
+                    inputElement = `<input size=21 class="rowInput">`;
                     break;
-                default:
-                    inputElement = `<input size=21>`;
+                case 6:
+                    inputElement = `<input type="button" value="Save" disabled>\n<input type="button" value="Discard">`;
                     break;
             }
 
             cell.innerHTML = inputElement;
+        });
+
+        let rowInputs = rowElement.querySelectorAll(".rowInput");
+
+        // Event listener for verifying all the inputs
+        rowInputs.forEach(input => {
+            input.addEventListener("change", event => {
+                this.#validateRow(rowElement);
+            });
         });
 
 
@@ -190,6 +218,27 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
 
     }
 
+    #validateRow(rowElement){
+        let cells = rowElement.querySelectorAll("td");
+        let valid = true;
+
+        if(new Date(cells[0].lastChild.value + "T05:00:00.000Z") == "Invalid Date")
+            valid = false;
+
+
+        if(isNaN(cells[1].lastChild.value))
+            valid = false;
+
+        for (let dropdown = 1; dropdown < 3; dropdown++) 
+            if(isNaN(cells[dropdown + 1].lastChild.value) || cells[dropdown + 1].lastChild.value == "")
+                valid = false;
+
+        if(valid)
+            cells[6].firstChild.disabled = false;
+        else
+            cells[6].firstChild.disabled = true;
+    }
+
     #submitRow(rowID) {
         let rowData = this._rows[rowID].slice(0, 6);
         rowData[0] = rowData[0].toLocaleString("en-CA", { timeZone: "America/Toronto" }).split(",")[0];
@@ -211,7 +260,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
 
     #createDropdown(typeObj, name) {
         let dropdownHtml = `
-        <select>
+        <select class="rowInput">
             <option value=""> -- Select a ${name} -- </option>`;
 
         typeObj.forEach(object => {
@@ -231,6 +280,6 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
 
         this.#transactionIDs.push(transactionIDs);
 
-        //TODO: PICKUp HERE: should add the buttons
+        this._rows[this._rows.length-1][6] = this.#actionButtons;
     }
 }
