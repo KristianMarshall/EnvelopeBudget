@@ -114,26 +114,31 @@ app.get('/githubPull', (req, res) => {
 
 app.post('/transactionSubmitJson', (req, res) => {
 
-  console.log(req.body);
+  let sqlData = [
+    req.body.rowData[0],        //Date
+    req.body.rowData[1],        //Amount
+    req.body.transactionIDs[1], //Id of Category
+    req.body.transactionIDs[2], //Id of Account
+    req.body.transactionIDs[3], //Id of Vendor
+    req.body.rowData[5],        //Memo
+    req.body.transactionIDs[0]
+  ];
   
   let query = "";
+
+
   if(req.body.transactionIDs[0] != null)
     query = `
     UPDATE transaction
     SET transactionDate = ?, transactionAmt = ?, categoryID = ?, accountID = ?, vendorID = ?, transactionMemo = ?
     WHERE transactionID = ?`;
-  else
-    query = "";
+  else{
+    query = `INSERT INTO transaction VALUES
+            (0, ?, ?, ?, ?, ?, ?, DEFAULT)`;
+    sqlData.pop();
+  }
 
-  let safeQuery = mysql.functions.format(query, [
-    req.body.rowData[0], 
-    req.body.rowData[1], 
-    req.body.transactionIDs[1], 
-    req.body.transactionIDs[2], 
-    req.body.transactionIDs[3], //TODO: error checking
-    req.body.rowData[5], 
-    req.body.transactionIDs[0]
-  ]);
+  let safeQuery = mysql.functions.format(query, sqlData);
 
   querySql(safeQuery).then(result => {
       console.log(result);
