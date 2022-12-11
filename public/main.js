@@ -4,12 +4,23 @@ window.addEventListener("load", event => {
 
     //Highlights the current page in the navbar
     let pageLinks = document.querySelectorAll("#navbar a");
-    
-    pageLinks.forEach(link =>{
-        if(document.title.includes(link.id))
+
+    pageLinks.forEach(link => {
+        if (document.title.includes(link.id))
             link.classList.add("selected");
     });
+});
+
+function drawAccountBalances(jsonData){
+    let accounts = jsonData;
+    let balanceHtml = "";
+
+    accounts.forEach(account => {
+        balanceHtml += `<p>${account.accountName}: $${account.balance}</p>\n`;
     });
+
+    document.querySelector("#AB").innerHTML = balanceHtml;
+}
 
 class htmlTable {
     _table;

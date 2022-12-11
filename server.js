@@ -117,7 +117,7 @@ app.post('/transactionSubmitJson', (req, res) => {
   console.log(req.body);
   
   let query = "";
-  if(req.body.transactionID != null)
+  if(req.body.transactionIDs[0] != null)
     query = `
     UPDATE transaction
     SET transactionDate = ?, transactionAmt = ?, categoryID = ?, accountID = ?, vendorID = ?, transactionMemo = ?
@@ -126,13 +126,13 @@ app.post('/transactionSubmitJson', (req, res) => {
     query = "";
 
   let safeQuery = mysql.functions.format(query, [
-    req.body.transactionDate, 
-    req.body.transactionAmt, 
-    req.body.categoryID, 
-    req.body.accountID, 
-    req.body.vendorID, //FIXME: if any of these are null the query fails
-    req.body.transactionMemo, 
-    req.body.transactionID
+    req.body.rowData[0], 
+    req.body.rowData[1], 
+    req.body.transactionIDs[1], 
+    req.body.transactionIDs[2], 
+    req.body.transactionIDs[3], //TODO: error checking
+    req.body.rowData[5], 
+    req.body.transactionIDs[0]
   ]);
 
   querySql(safeQuery).then(result => {
@@ -160,7 +160,8 @@ function querySql(sql) {
   return new Promise((resolve, reject) => {
       con.query(sql, (error, sqlResult) => {
           if(error) {
-              return reject(error);
+            console.log(error);  //WAS: return reject(error);
+            return resolve(error);
           }           
 
           return resolve(sqlResult);

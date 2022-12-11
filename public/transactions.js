@@ -1,15 +1,18 @@
 //Initialized data object to be filled after the fetch has returned
 let transactionTable = "";
 
+let transactionJson = fetch("./transactionsJson").then(response => response.json());
+let accountBalanceJson = fetch("/AccountBalanceJson").then(response => response.json());
 
-//This fetch grabs all of the data for the page. then draws the table with the information.
-fetch("./transactionsJson")
-    .then(response => response.json())
-    .then(jsonData => {
+window.addEventListener("load", event => {
+    //This fetch grabs all of the data for the page. then draws the table with the information.
+    Promise.all([transactionJson, accountBalanceJson]).then(allData => {
+        transactionTable = new TransactionTable(document.querySelector("table"), allData[0]);
 
-        transactionTable = new TransactionTable(document.querySelector("table"), jsonData);
-
+        drawAccountBalances(allData[1]);
     });
+});
+
 
 
 class TransactionTable extends htmlTable { //TODO: should make rows and cells their own classes
@@ -63,7 +66,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         rowHTML += `<tr>`;
 
         this._rows[rowID].forEach(data => {
-            
+
             //Formatting checks
             if (data == null)
                 data = "";
@@ -72,27 +75,27 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             else if (data.constructor === Date)
                 data = data.toDateString();
 
-            rowHTML += `<td>${data}</td>`;      
+            rowHTML += `<td>${data}</td>`;
         });
 
         rowHTML += "</tr>";
 
         //If no rows just add the row in the inner html. otherwise if its a new row append it to the end. lastly if its replacing
         //          a row add it after then remove it
-        if(tableBody.rows.length == 0)
+        if (tableBody.rows.length == 0)
             tableBody.innerHTML += rowHTML; //calls to innerHTML overwrite the whole tbody including event listeners
-        else{
-            if(rowID >= tableBody.rows.length+1)
+        else {
+            if (rowID >= tableBody.rows.length + 1)
                 tableBody.lastChild.insertAdjacentHTML("afterend", rowHTML);
-            else{
-                tableBody.rows[rowID-1].insertAdjacentHTML("afterend", rowHTML);
-                tableBody.rows[rowID-1].remove();
+            else {
+                tableBody.rows[rowID - 1].insertAdjacentHTML("afterend", rowHTML);
+                tableBody.rows[rowID - 1].remove();
             }
         }
 
         let editButton = document.querySelectorAll("tr")[rowID].querySelector(".edit");
         //if a new row is added it will be blank and imminently switched to an editable row so the buttons aren't needed
-        if(editButton != null){
+        if (editButton != null) {
             editButton.addEventListener("click", event => {
                 let tableRowElement = event.path[2];
                 this.#makeEditableRow(tableRowElement);
@@ -102,7 +105,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
 
     }
 
-    #addDataToEditableRow(rowElement){
+    #addDataToEditableRow(rowElement) {
         let rowID = rowElement.rowIndex;
         let vendor = this.#transactionIDs[rowID][3] === null ? "" : this.#transactionIDs[rowID][3]; //If its null make it equal a space because that will set it to select a vendor in the drop down
         let dataToAdd = [
@@ -113,38 +116,25 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             vendor,                                         //vendor
             this._rows[rowID][5]                            //memo
         ]
-        for(let colIdx = 0; colIdx < dataToAdd.length; colIdx++)
+        for (let colIdx = 0; colIdx < dataToAdd.length; colIdx++)
             rowElement.querySelectorAll("td")[colIdx].querySelector("*").value = dataToAdd[colIdx];
     }
 
-    #saveDataFromEditableRow(rowElement){
+    #saveDataFromEditableRow(rowElement) {
         let cells = rowElement.querySelectorAll("td");
-        cells.forEach((cell, index) => {
-            let cellInput = cell.lastChild; //weird bug with first child but last does the same thing when there should only be one element
-            
-            switch (index) { //TODO: Flatten switch it is unneeded
-                case 0:
-                    this._rows[rowElement.rowIndex][index]  = new Date(cell.lastChild.value);
-                    break;
-                case 1:
-                    this._rows[rowElement.rowIndex][index]  = Number(cell.lastChild.value);
-                    break;
-                case 2:
-                case 3:
-                case 4:
-                    this._rows[rowElement.rowIndex][index] = cell.lastChild.selectedOptions[0].innerHTML; //TODO: error checking
-                    this.#transactionIDs[rowElement.rowIndex][index-1] = Number(cell.lastChild.value);
-                    break;
-                case 5:
-                    this._rows[rowElement.rowIndex][index]  = cell.lastChild.value;
-                    break;
-            }
-        });
 
-        //TODO: return it to a regular row
+        this._rows[rowElement.rowIndex][0] = new Date(cells[0].lastChild.value + "T05:00:00.000Z");
+        this._rows[rowElement.rowIndex][1] = Number(cells[1].lastChild.value);
+
+        for (let dropdown = 1; dropdown < 4; dropdown++) {
+            this._rows[rowElement.rowIndex][dropdown + 1] = cells[dropdown + 1].lastChild.selectedOptions[0].innerHTML; //TODO: error checking
+            this.#transactionIDs[rowElement.rowIndex][dropdown] = Number(cells[dropdown + 1].lastChild.value);
+        }
+
+        this._rows[rowElement.rowIndex][5] = cells[5].lastChild.value;
     }
 
-    #makeEditableRow(rowElement){
+    #makeEditableRow(rowElement) {
         let cells = rowElement.querySelectorAll("td");
         cells.forEach((cell, index) => {
             let inputElement = "";
@@ -158,7 +148,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
                 case 2:
                 case 3:
                 case 4:
-                    inputElement = this.#createDropdown(Object.values(this.#notsurewhattocallit)[index-2], this._rows[0][index]);
+                    inputElement = this.#createDropdown(Object.values(this.#notsurewhattocallit)[index - 2], this._rows[0][index]);
                     break;
                 case 6:
                     inputElement = `<input type="button" value="Save">\n<input type="button" value="Discard">`;
@@ -174,48 +164,52 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
 
         //Event listener for the vendor dropdown
         cells[4].lastChild.addEventListener("change", event => {
-            if(event.target.value === "addNew"){
+            if (event.target.value === "addNew") {
                 event.target.insertAdjacentHTML("afterend", "<input size=15>");
                 event.target.remove();
             }
         })
 
         //event listener for the discard button
-        cells[cells.length-1].lastChild.addEventListener("click", event => {
-            if(this._rows[rowElement.rowIndex][0] != '')
+        cells[cells.length - 1].lastChild.addEventListener("click", event => {
+            if (this._rows[rowElement.rowIndex][0] != '')
                 this._printRow(rowElement.rowIndex);
-            else{
+            else {
                 rowElement.remove();
-                this._rows.splice(rowElement.rowIndex,1);
-                this.#transactionIDs.splice(rowElement.rowIndex,1);
+                this._rows.splice(rowElement.rowIndex, 1);
+                this.#transactionIDs.splice(rowElement.rowIndex, 1);
             }
         })
 
         //event listener for the save button
-        cells[cells.length-1].firstChild.addEventListener("click", event => {
-            this.#saveDataFromEditableRow(rowElement);
-            this.#submitRow(rowElement); 
+        cells[cells.length - 1].firstChild.addEventListener("click", event => {
+            this.#saveDataFromEditableRow(rowElement); //FIXME: should only save if database update goes well
+            this.#submitRow(rowElement.rowIndex);
+            this._printRow(rowElement.rowIndex);
         })
 
     }
 
-    //TODO: add a submit to database function
-    #submitRow(rowID){
-    //     let body = getRowData(rowID);
-
-    // fetch("/transactionSubmitJson", {
-    //     method: 'post',
-    //     body: JSON.stringify(body),
-    //     headers: { 'Content-Type': 'application/json' }
-    // })
-    //     .then(response => response.json())
-    //     .then(result => {
-    //         console.log(result); //TODO: error check
-    //         setRow(rowID, body);
-    //     });
+    #submitRow(rowID) {
+        let rowData = this._rows[rowID].slice(0, 6);
+        rowData[0] = rowData[0].toLocaleString("en-CA", { timeZone: "America/Toronto" }).split(",")[0];
+        fetch("/transactionSubmitJson", {
+            method: 'post',
+            body: JSON.stringify({
+                transactionIDs: this.#transactionIDs[rowID],
+                rowData: rowData
+            }),
+            headers: { 'Content-Type': 'application/json' }
+        })
+            .then(response => response.json())
+            .then(result => {
+                console.log(result); //TODO: error check
+                fetch("/AccountBalanceJson").then(response => response.json())
+                .then(accountJson => {drawAccountBalances(accountJson)});
+            });
     }
 
-    #createDropdown(typeObj, name){
+    #createDropdown(typeObj, name) {
         let dropdownHtml = `
         <select>
             <option value=""> -- Select a ${name} -- </option>`;
@@ -228,7 +222,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         return dropdownHtml;
     }
 
-    _addRow(rowData){
+    _addRow(rowData) {
         super._addRow(rowData);
 
         let transactionIDs = [];
