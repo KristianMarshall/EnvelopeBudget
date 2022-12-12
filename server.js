@@ -126,6 +126,19 @@ app.post('/transactionSubmitJson', (req, res) => {
   
 });
 
+app.post('/transactionDeleteJson', (req, res) => {
+
+  let query = "DELETE FROM transaction WHERE transactionID = ?;";
+
+  let safeQuery = mysql.functions.format(query, [req.body.id]);
+
+  querySql(safeQuery).then(result => {
+      console.log(result);
+      res.json(result);
+  });
+  
+});
+
 
 
 app.listen(PORT, () => {

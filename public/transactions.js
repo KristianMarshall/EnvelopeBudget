@@ -108,18 +108,42 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             });
 
             //TODO: need to center these buttons
-            deleteButton.addEventListener("click", event => {
-                event.target.insertAdjacentHTML("afterend", `<input id="cancel" type="button" value="Cancel"><input id="confirm" type="button" value="Confirm">`);
-                event.target.parentElement.querySelector("#cancel").addEventListener("click", event => {
-                    console.log("cancel button " + rowID); //TODO: make the cancel button do something
+            deleteButton.addEventListener("click", deleteEvent => {
+                deleteEvent.target.insertAdjacentHTML("afterend", `<input id="cancel" type="button" value="Cancel"><input id="confirm" type="button" value="Confirm">`);
+                deleteEvent.target.hidden = true;
+
+                deleteEvent.target.parentElement.querySelector("#cancel").addEventListener("click", event => {
+                    deleteEvent.target.hidden = false
+                    event.target.parentElement.querySelector("#confirm").remove();
+                    event.target.remove();
                 });
-                event.target.parentElement.querySelector("#confirm").addEventListener("click", event => {
-                    console.log("confirm button " + rowID); //TODO: make the confirm button do something
+
+                deleteEvent.target.parentElement.querySelector("#confirm").addEventListener("click", event => {
+                    this.#deleteRow(rowID, event.target.parentElement.parentElement);
                 });
-                event.target.remove();
+                
             });
         }
 
+    }
+
+    #deleteRow(rowID, rowElement){
+        fetch("/transactionDeleteJson", {
+            method: 'post',
+            body: JSON.stringify({
+                id: this.#transactionIDs[rowID][0]
+            }),
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log(result);
+            updateAccountBalances();
+        });
+        this.#transactionIDs.splice(rowID,1);
+        this._rows.splice(rowID,1);
+        rowElement.remove();
+        
     }
 
     #addDataToEditableRow(rowElement) {
@@ -272,10 +296,8 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
                     this.#transactionIDs[rowID][3] = result.vendorResult.insertId;
                     this.#notsurewhattocallit.vendors.push({id: result.vendorResult.insertId, name: this._rows[rowID][4]});
                 }
-
-                //Update the account balances in left bar
-                fetch("/AccountBalanceJson").then(response => response.json())
-                .then(accountJson => {drawAccountBalances(accountJson)});
+                updateAccountBalances();
+                
             });
     }
 
@@ -304,4 +326,10 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
 
         this._rows[this._rows.length-1][6] = this.#actionButtons;
     }
+}
+
+//Update the account balances in left bar
+function updateAccountBalances(){
+    fetch("/AccountBalanceJson").then(response => response.json())
+    .then(accountJson => {drawAccountBalances(accountJson)});
 }

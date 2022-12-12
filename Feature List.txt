@@ -2,8 +2,8 @@ Things i want to get done before creating video
 
     - add more data
     - pretty up category transfers page
-    - add row adds rows to the top
-
+    - add row adds rows to the top - unshift the data rows to get the data in the right place
+    
 Future Things
 
     - Bootstrap to pretty it up
