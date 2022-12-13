@@ -60,7 +60,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         this._printTable();
         document.querySelector("#addRow").addEventListener("click", event => {
             this._addRow();
-            this.#makeEditableRow([...document.querySelectorAll("tr")].pop());
+            this.#makeEditableRow([...document.querySelectorAll("tr")][1]);
         });
     }
 
@@ -69,7 +69,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         let rowHTML = "";
         rowHTML += `<tr>`;
 
-        this._rows[rowID].forEach(data => {
+        this._rows[rowID == 0 ? 1 : rowID].forEach(data => {
 
             //Formatting checks
             if (data == null)
@@ -89,7 +89,9 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         if (tableBody.rows.length == 0)
             tableBody.innerHTML += rowHTML; //calls to innerHTML overwrite the whole tbody including event listeners
         else {
-            if (rowID >= tableBody.rows.length + 1)
+            if (rowID == 0)
+                tableBody.firstChild.insertAdjacentHTML("beforebegin", rowHTML);
+            else if (rowID > tableBody.rows.length)
                 tableBody.lastChild.insertAdjacentHTML("afterend", rowHTML);
             else {
                 tableBody.rows[rowID - 1].insertAdjacentHTML("afterend", rowHTML);
@@ -316,15 +318,21 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
 
     //TODO: should default date to today
     _addRow(rowData) {
-        super._addRow(rowData);
+        if(rowData === undefined){
+            rowData = [];
+            for (let i = 0; i < this._rows[0].length-1; i++)
+                rowData.push(''); //TODO: should probably switch to null
+            rowData.push(this.#actionButtons);
+        }
+
+        this._rows.splice(1, 0, rowData);
+        this._printRow(0);
 
         let transactionIDs = [];
         for (let i = 0; i < this.#transactionIDs[0].length; i++)
             transactionIDs.push(null);
 
-        this.#transactionIDs.push(transactionIDs);
-
-        this._rows[this._rows.length-1][6] = this.#actionButtons;
+        this.#transactionIDs.splice(1, 0, transactionIDs);
     }
 }
 

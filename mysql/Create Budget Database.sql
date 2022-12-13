@@ -174,7 +174,7 @@ FROM BudgetTest.transaction t
     ON t.accountID = a.accountID
     LEFT JOIN vendor v
     ON t.vendorID = v.vendorID
-ORDER BY transactionDate DESC;
+ORDER BY transactionDate DESC, transactionID DESC;
 
 -- Account Balance View
 CREATE VIEW AccountBalance AS
