@@ -60,7 +60,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         this._printTable();
         document.querySelector("#addRow").addEventListener("click", event => {
             this._addRow();
-            this.#makeEditableRow([...document.querySelectorAll("tr")].pop());
+            this.#makeEditableRow([...document.querySelectorAll("tr")][1]);
         });
     }
 
@@ -69,7 +69,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         let rowHTML = "";
         rowHTML += `<tr>`;
 
-        this._rows[rowID].forEach(data => {
+        this._rows[rowID == 0 ? 1 : rowID].forEach(data => {
 
             //Formatting checks
             if (data == null)
@@ -89,7 +89,9 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         if (tableBody.rows.length == 0)
             tableBody.innerHTML += rowHTML; //calls to innerHTML overwrite the whole tbody including event listeners
         else {
-            if (rowID >= tableBody.rows.length + 1)
+            if (rowID == 0)
+                tableBody.firstChild.insertAdjacentHTML("beforebegin", rowHTML);
+            else if (rowID > tableBody.rows.length)
                 tableBody.lastChild.insertAdjacentHTML("afterend", rowHTML);
             else {
                 tableBody.rows[rowID - 1].insertAdjacentHTML("afterend", rowHTML);
@@ -108,18 +110,42 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             });
 
             //TODO: need to center these buttons
-            deleteButton.addEventListener("click", event => {
-                event.target.insertAdjacentHTML("afterend", `<input id="cancel" type="button" value="Cancel"><input id="confirm" type="button" value="Confirm">`);
-                event.target.parentElement.querySelector("#cancel").addEventListener("click", event => {
-                    console.log("cancel button " + rowID); //TODO: make the cancel button do something
+            deleteButton.addEventListener("click", deleteEvent => {
+                deleteEvent.target.insertAdjacentHTML("afterend", `<input id="cancel" type="button" value="Cancel"><input id="confirm" type="button" value="Confirm">`);
+                deleteEvent.target.hidden = true;
+
+                deleteEvent.target.parentElement.querySelector("#cancel").addEventListener("click", event => {
+                    deleteEvent.target.hidden = false
+                    event.target.parentElement.querySelector("#confirm").remove();
+                    event.target.remove();
                 });
-                event.target.parentElement.querySelector("#confirm").addEventListener("click", event => {
-                    console.log("confirm button " + rowID); //TODO: make the confirm button do something
+
+                deleteEvent.target.parentElement.querySelector("#confirm").addEventListener("click", event => {
+                    this.#deleteRow(rowID, event.target.parentElement.parentElement);
                 });
-                event.target.remove();
+                
             });
         }
 
+    }
+
+    #deleteRow(rowID, rowElement){
+        fetch("/transactionDeleteJson", {
+            method: 'post',
+            body: JSON.stringify({
+                id: this.#transactionIDs[rowID][0]
+            }),
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log(result);
+            updateAccountBalances();
+        });
+        this.#transactionIDs.splice(rowID,1);
+        this._rows.splice(rowID,1);
+        rowElement.remove();
+        
     }
 
     #addDataToEditableRow(rowElement) {
@@ -272,10 +298,8 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
                     this.#transactionIDs[rowID][3] = result.vendorResult.insertId;
                     this.#notsurewhattocallit.vendors.push({id: result.vendorResult.insertId, name: this._rows[rowID][4]});
                 }
-
-                //Update the account balances in left bar
-                fetch("/AccountBalanceJson").then(response => response.json())
-                .then(accountJson => {drawAccountBalances(accountJson)});
+                updateAccountBalances();
+                
             });
     }
 
@@ -294,14 +318,26 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
 
     //TODO: should default date to today
     _addRow(rowData) {
-        super._addRow(rowData);
+        if(rowData === undefined){
+            rowData = [];
+            for (let i = 0; i < this._rows[0].length-1; i++)
+                rowData.push(''); //TODO: should probably switch to null
+            rowData.push(this.#actionButtons);
+        }
+
+        this._rows.splice(1, 0, rowData);
+        this._printRow(0);
 
         let transactionIDs = [];
         for (let i = 0; i < this.#transactionIDs[0].length; i++)
             transactionIDs.push(null);
 
-        this.#transactionIDs.push(transactionIDs);
-
-        this._rows[this._rows.length-1][6] = this.#actionButtons;
+        this.#transactionIDs.splice(1, 0, transactionIDs);
     }
+}
+
+//Update the account balances in left bar
+function updateAccountBalances(){
+    fetch("/AccountBalanceJson").then(response => response.json())
+    .then(accountJson => {drawAccountBalances(accountJson)});
 }
