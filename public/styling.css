@@ -2,7 +2,12 @@ body{
     background-color: #282828;
     color: white;
 }
+
 table {
+    margin-top: 1em;
+}
+
+/* table {
     border-collapse: collapse;
 }
 
@@ -13,7 +18,7 @@ td, th {
 
 tr:nth-child(even) {
     background-color: #4d4d4d;
-}
+} */
 
 footer{
     margin-top: 3em;
@@ -71,7 +76,7 @@ footer{
     padding-left: .5em;
 }
 #content {
-    width:100%;
+    width:60%;
     margin: 2em;
     flex: 1 0 auto;
 }

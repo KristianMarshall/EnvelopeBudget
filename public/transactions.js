@@ -20,8 +20,8 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
     #notsurewhattocallit;
     colsToHide = 4;
     #actionButtons = `
-        <input type="button" value="Edit" class="edit">
-        <input type="button" value="Delete" class="delete">
+        <input type="button" value="Edit" class="edit btn btn-dark btn-sm">
+        <input type="button" value="Delete" class="delete btn btn-dark btn-sm">
         `;
     constructor(tableElement, jsonData) {
         let tableData = [];
@@ -33,8 +33,8 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         tableData.map(row => row[0] = new Date(row[0])); //Sets all the date rows as a date object
 
         let actionButtons = `
-        <input type="button" value="Edit" class="edit">
-        <input type="button" value="Delete" class="delete">
+        <input type="button" value="Edit" class="edit btn btn-dark btn-sm">
+        <input type="button" value="Delete" class="delete btn btn-dark btn-sm">
         `;
         tableData.map(row => row.push(actionButtons));
 
@@ -111,7 +111,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
 
             //TODO: need to center these buttons
             deleteButton.addEventListener("click", deleteEvent => {
-                deleteEvent.target.insertAdjacentHTML("afterend", `<input id="cancel" type="button" value="Cancel"><input id="confirm" type="button" value="Confirm">`);
+                deleteEvent.target.insertAdjacentHTML("afterend", `<input id="cancel" type="button" value="Cancel" class="btn btn-dark btn-sm"><input id="confirm" type="button" value="Confirm" class="btn btn-dark btn-sm">`);
                 deleteEvent.target.hidden = true;
 
                 deleteEvent.target.parentElement.querySelector("#cancel").addEventListener("click", event => {
@@ -212,7 +212,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
                     inputElement = `<input size=21 class="rowInput">`;
                     break;
                 case 6:
-                    inputElement = `<input type="button" value="Save" disabled>\n<input type="button" value="Discard">`;
+                    inputElement = `<input type="button" value="Save" class="btn btn-dark btn-sm" disabled>\n<input type="button" value="Discard" class="btn btn-dark btn-sm">`;
                     break;
             }
 
