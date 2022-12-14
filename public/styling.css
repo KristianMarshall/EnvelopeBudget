@@ -81,7 +81,7 @@ footer{
 }
 
 /* the date and amount on transaction table */
-#transactionsTable td:nth-child(1), #transactionsTable td:nth-child(2), #transactionsTable td:nth-child(2) input {
+#transactionsTable td:nth-child(1), #transactionsTable td:nth-child(2), #transactionsTable td:nth-child(2) input, #catTransTable td:nth-child(2),#catTransTable td:nth-child(1) {
     text-align: right;
 }
 

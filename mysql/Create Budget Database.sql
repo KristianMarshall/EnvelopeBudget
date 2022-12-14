@@ -45,7 +45,7 @@ CREATE TABLE vendor
 	vendorName			VARCHAR(20)	NOT NULL
 );
 
--- TODO: Add users
+-- //TODO: Add users
 
 CREATE TABLE transaction
 (
@@ -190,13 +190,13 @@ GROUP BY accountName;
 
 -- Category Transaction View
 CREATE VIEW CategoryTransfers AS
-SELECT catTranDate, catTranAmt,  tC.categoryName as ToCategory, fC.categoryName as FromCategory, catTranMemo
+SELECT catTranID, fromCategoryID, toCategoryID, catTranDate as "Date", catTranAmt as "Amount", fC.categoryName as "From Category",  tC.categoryName as "To Category", catTranMemo as "Memo"
 FROM BudgetTest.categoryTransfer cT
 	join category tC
     on cT.toCategoryID = tC.categoryID
     join category fC
     on cT.fromCategoryID = fC.categoryID
-ORDER BY catTranDate DESC;
+ORDER BY catTranDate DESC, catTranID DESC;
 
 -- Category Activity View
 CREATE VIEW CategoryActivity AS

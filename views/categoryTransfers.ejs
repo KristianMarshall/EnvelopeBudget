@@ -6,45 +6,21 @@
         <div id="AB"></div>
     </div>
     <div id="content">
-        <table>
-            <tr>
-                <!-- TODO: change to thead and tbody -->
-                <th>Still Loading</th>
-            </tr>
+        <input type="button" value="Add Row" id="addRow">
+        <input type="button" value="Submit All" id="submitAll">
+        <table id="catTransTable">
+            <thead>
+                <tr>
+                    <th>Still Loading</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
         </table>
         <p> maybe just have category transfers as a quick feature on the dashboard?</p>
     </div>
 </div>
 
-<script type="text/javascript">
-    let table = document.querySelector("table"); //TODO: add buttons to edit or add a transfer
-
-    fetch("./categoryTransfersJson")
-    .then(response => response.json())
-    .then(data => {
-        let headings = Object.keys(data[0]);
-        let tableHTML = "";
-        
-        tableHTML += "<tr>\n";
-        for(let i = 0; i < headings.length; i++) {
-            tableHTML += `<th>${headings[i]}</th>\n`;
-        }
-        tableHTML += "</tr>\n";
-
-        for(let i = 0; i < data.length; i++) {
-            tableHTML += "<tr>\n";
-            for(let j = 0; j < headings.length; j++) {
-                rowData = data[i][headings[j]];
-
-                if(typeof rowData == "number")
-                    rowData = rowData.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
-                    
-                tableHTML += `<td>${rowData}</td>\n`;
-            }
-            tableHTML += "</tr>\n";
-        }
-        table.innerHTML = tableHTML; //every call to innerHTML on table adds a <tbody> around it
-    });
-</script>
-
+<script type="text/javascript" src="catTrans.js"></script>
 <%- include('./partials/footer'); %>

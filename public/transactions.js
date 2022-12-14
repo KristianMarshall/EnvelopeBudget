@@ -18,7 +18,6 @@ window.addEventListener("load", event => {
 class TransactionTable extends htmlTable { //TODO: should make rows and cells their own classes
     #transactionIDs = [];
     #notsurewhattocallit;
-    colsToHide = 4;
     #actionButtons = `
         <input type="button" value="Edit" class="edit">
         <input type="button" value="Delete" class="delete">
@@ -242,9 +241,9 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             if (this._rows[rowElement.rowIndex][0] != '')
                 this._printRow(rowElement.rowIndex);
             else {
+                rowElement.remove();
                 this._rows.splice(rowElement.rowIndex, 1);
                 this.#transactionIDs.splice(rowElement.rowIndex, 1);
-                rowElement.remove();
             }
         })
 
