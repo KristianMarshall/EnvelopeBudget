@@ -26,7 +26,7 @@ app.get('/TransactionsJson', (req, res) => {
     }
   });
 
-  let transactionsQuery = querySql("SELECT * FROM Transactions");
+  let transactionsQuery = querySql("SELECT * FROM Transactions"); //TODO: should convert to multiple query
   let categoriesQuery = querySql("SELECT categoryID as id, categoryName as name FROM category");
   let accountsQuery = querySql("SELECT accountID as id, accountName as name FROM BudgetTest.account");
   let vendorsQuery = querySql("SELECT vendorID as id, vendorName as name FROM vendor");
@@ -58,7 +58,10 @@ app.get('/categoryTransfersJson', (req, res) => {
     }
   });
 
-  con.query("SELECT * FROM CategoryTransfers;", (error, result) => {
+  con.query(`
+  SELECT * FROM CategoryTransfers; 
+  SELECT categoryID as id, categoryName as name FROM category;`, 
+  (error, result) => {
     res.json(result);
   });
 

@@ -9,29 +9,34 @@ fetch("./categoryTransfersJson")
 
 class CatTransTable extends htmlTable {
     #tableIds = [];
+    #categories;
     #actionButtons = `
         <input type="button" value="Edit" class="edit">
         <input type="button" value="Delete" class="delete">
         `;
     constructor(tableElement, jsonData) {
-        let headings = Object.keys(jsonData[0]).slice(3);
+        let tableData = jsonData[0];
+        let headings = Object.keys(tableData[0]).slice(3);
         headings.push("Actions");
 
-        jsonData = jsonData.map(t => Object.entries(t).map(d => d[1]).slice(3)); //Really ugly but it converts an array of objects into an array of arrays and cuts off te first 3 values
-        jsonData.map(row => row[0] = new Date(row[0])); //Sets all the date rows as a date object
+        tableData = tableData.map(t => Object.entries(t).map(d => d[1]).slice(3)); //Really ugly but it converts an array of objects into an array of arrays and cuts off te first 3 values
+        tableData.map(row => row[0] = new Date(row[0])); //Sets all the date rows as a date object
         
         let actionButtons = `
         <input type="button" value="Edit" class="edit">
         <input type="button" value="Delete" class="delete">
         `;
-        jsonData.map(row => row.push(actionButtons));
+        tableData.map(row => row.push(actionButtons));
 
-        jsonData.unshift(headings);
+        tableData.unshift(headings);
 
-        super(tableElement, jsonData);
+        super(tableElement, tableData);
 
-        let idHeadings = Object.keys(jsonData[0]).slice(0, 4);
-        this.#tableIds =  jsonData.map(t => Object.entries(t).map(d => d[1]).slice(0, 3)); //Same thing as above but grabs the other part of the array
+        this.#categories = jsonData[1];
+        this.#categories.splice(1,1); //remove account transfer
+
+        let idHeadings = Object.keys(tableData[0]).slice(0, 4);
+        this.#tableIds =  tableData.map(t => Object.entries(t).map(d => d[1]).slice(0, 3)); //Same thing as above but grabs the other part of the array
         this.#tableIds.unshift(idHeadings);
 
         document.querySelector("#addRow").addEventListener("click", event => {
@@ -85,6 +90,10 @@ class CatTransTable extends htmlTable {
                 case 1:
                     inputElement = `<input size=10 class="rowInput">`;
                     break;
+                case 2:   
+                case 3:
+                    inputElement = this.#createDropdown(Object.values(this.#categories), "Category");
+                    break;
                 case 4:
                     inputElement = `<input size=21 class="rowInput">`;
                     break;
@@ -95,6 +104,19 @@ class CatTransTable extends htmlTable {
 
             cell.innerHTML = inputElement;
         });
+    }
+
+    #createDropdown(typeObj, name) {
+        let dropdownHtml = `
+        <select class="rowInput">
+            <option value=""> -- Select a ${name} -- </option>`;
+
+        typeObj.forEach(object => {
+            dropdownHtml += `<option value="${object.id}">${object.name}</option>`;
+        });
+
+        dropdownHtml += "</select>";
+        return dropdownHtml;
     }
 
     _addRow(rowData) {
