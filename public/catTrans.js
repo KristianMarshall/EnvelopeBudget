@@ -35,8 +35,8 @@ class CatTransTable extends htmlTable {
         this.#categories = jsonData[1];
         this.#categories.splice(1,1); //remove account transfer
 
-        let idHeadings = Object.keys(tableData[0]).slice(0, 4);
-        this.#tableIds =  tableData.map(t => Object.entries(t).map(d => d[1]).slice(0, 3)); //Same thing as above but grabs the other part of the array
+        let idHeadings = Object.keys(jsonData[0][0]).slice(0, 3);
+        this.#tableIds =  jsonData[0].map(t => Object.entries(t).map(d => d[1]).slice(0, 3)); //Same thing as above but grabs the other part of the array
         this.#tableIds.unshift(idHeadings);
 
         document.querySelector("#addRow").addEventListener("click", event => {
@@ -77,6 +77,49 @@ class CatTransTable extends htmlTable {
                 tableBody.rows[rowID - 1].remove();
             }
         }
+
+        let editButton = document.querySelectorAll("tr")[rowID].querySelector(".edit");
+        let deleteButton = document.querySelectorAll("tr")[rowID].querySelector(".delete");
+
+        //if a new row is added it will be blank and imminently switched to an editable row so the buttons aren't needed
+        if (editButton != null) {
+            editButton.addEventListener("click", event => {
+                let tableRowElement = event.path[2];
+                this.#makeEditableRow(tableRowElement);
+                this.#addDataToEditableRow(tableRowElement);
+            });
+
+            //TODO: need to center these buttons
+            deleteButton.addEventListener("click", deleteEvent => {
+                deleteEvent.target.insertAdjacentHTML("afterend", `<input id="cancel" type="button" value="Cancel"><input id="confirm" type="button" value="Confirm">`);
+                deleteEvent.target.hidden = true;
+
+                deleteEvent.target.parentElement.querySelector("#cancel").addEventListener("click", event => {
+                    deleteEvent.target.hidden = false
+                    event.target.parentElement.querySelector("#confirm").remove();
+                    event.target.remove();
+                });
+
+                deleteEvent.target.parentElement.querySelector("#confirm").addEventListener("click", event => {
+                    //this.#deleteRow(rowID, event.target.parentElement.parentElement);
+                });
+                
+            });
+        }
+    }
+
+    #addDataToEditableRow(rowElement) {
+        let rowID = rowElement.rowIndex;
+       
+        let dataToAdd = [
+            this._rows[rowID][0].toLocaleDateString("en-CA"),  //date
+            this._rows[rowID][1],                              //amount
+            this.#tableIds[rowID][1],                          //category
+            this.#tableIds[rowID][2],                          //account
+            this._rows[rowID][4]                               //memo
+        ]
+        for (let colIdx = 0; colIdx < dataToAdd.length; colIdx++)
+            rowElement.querySelectorAll("td")[colIdx].querySelector("*").value = dataToAdd[colIdx];
     }
 
     #makeEditableRow(rowElement) {

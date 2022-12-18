@@ -19,7 +19,9 @@ window.addEventListener("load", event => {
             for (let j = 1; j < headings.length; j++) {
                 rowData = data[i][headings[j]];
 
-                if (typeof rowData == "number")
+                if(rowData == null)
+                    rowData = "$0.00";
+                else if (typeof rowData == "number")
                     rowData = rowData.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
 
                 tableHTML += `<td>${rowData}</td>\n`;
