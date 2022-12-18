@@ -115,7 +115,8 @@ INSERT INTO category VALUES
 (0, 'Car Loan', 			DEFAULT, 118.04,	 3, NULL, 5),
 (0, 'Vacation', 			DEFAULT, 200,		 3, NULL, 6),
 (0, 'Groceries', 			DEFAULT, 200,		 3, NULL, 2),
-(0, 'Rent', 				DEFAULT, 1040.72,	 3, NULL, 2);
+(0, 'Rent', 				DEFAULT, 1040.72,	 3, NULL, 2),
+(0, 'Emergency Fund', 		DEFAULT, 75,		 3, NULL, 6);
 
 -- accountID, accountName, accountHidden
 INSERT INTO account VALUES 
@@ -131,27 +132,31 @@ INSERT INTO vendor VALUES
 
 -- transactionID, transactionDate, transactionAmt, categoryID, accountID, vendorID, transactionMemo, transactionNotCleared
 INSERT INTO transaction VALUES
-(0,	'2021-01-01', 2000, 	 1, 1, NULL, 	'Start Of Budget',	DEFAULT),
-(0,	'2021-01-01', 8000, 	 1, 2, NULL, 	'Start Of Budget',	DEFAULT),
-(0,	'2021-01-25', -50.00,	 3, 1, 1, 		'Date Night',		DEFAULT),
-(0,	'2021-01-27', -75.23, 	 8, 1, 2, 		'Few Things', 		DEFAULT),
-(0,	'2021-01-30', -45.27, 	 4, 1, NULL, 	'game', 			DEFAULT),
-(0,	'2021-02-01', -1040.38,  9, 1, NULL, 	'Rent', 			DEFAULT),
-(0,	'2021-02-02', -250, 	 2, 1, NULL, 	'Move to savings', 	DEFAULT),
-(0,	'2021-02-02', 250, 		 2, 2, NULL, 	'Move to savings', 	DEFAULT),
-(0,	'2021-02-01', -15.72, 	 3, 1, 3, 		NULL,			 	DEFAULT),
-(0,	'2021-02-01', 1423.58, 	 1, 1, NULL, 	'Paycheque', 		DEFAULT);
+(0,	'2022-01-01', 2000, 	 1, 1, NULL, 	'Start Of Budget',	DEFAULT),
+(0,	'2022-01-01', 8000, 	 1, 2, NULL, 	'Start Of Budget',	DEFAULT),
+(0,	'2022-01-25', -50.00,	 3, 1, 1, 		'Date Night',		DEFAULT),
+(0,	'2022-01-27', -75.23, 	 8, 1, 2, 		'Few Things', 		DEFAULT),
+(0,	'2022-01-30', -45.27, 	 4, 1, NULL, 	'game', 			DEFAULT),
+(0,	'2022-02-01', -1040.38,  9, 1, NULL, 	'Rent', 			DEFAULT),
+(0,	'2022-02-02', -250, 	 2, 1, NULL, 	'Move to savings', 	DEFAULT),
+(0,	'2022-02-02', 250, 		 2, 2, NULL, 	'Move to savings', 	DEFAULT),
+(0,	'2022-02-01', -15.72, 	 3, 1, 3, 		NULL,			 	DEFAULT),
+(0,	'2022-02-01', 1423.58, 	 1, 1, NULL, 	'Paycheque', 		DEFAULT),
+(0,	'2022-12-15', -18.37, 	 3, 1, 3, 		NULL,			 	DEFAULT),
+(0,	'2022-12-17', -75.48, 	 5, 1, NULL, 	NULL,			 	DEFAULT);
 
 -- catTranID, catTranDate, catTranAmt, fromCategoryID, toCategoryID, catTranMemo
 INSERT INTO categoryTransfer VALUES
-(0, '2021-01-01', 1040.38,  1,  9, NULL),
-(0, '2021-01-01', 100,  	1,  3, NULL),
-(0, '2021-01-01', 250,  	1,  8, NULL),
-(0, '2021-01-01', 150,  	1,  4, NULL),
-(0, '2021-02-01', 25,  		4,  5, NULL),
-(0, '2021-02-02', 25,  		4,  5, NULL),
-(0, '2021-02-01', 150,  	1, 	5, NULL),
-(0, '2021-02-01', 1040.38,  1, 	9, NULL);
+(0, '2022-01-01', 1040.38,  1,  9, NULL),
+(0, '2022-01-01', 100,  	1,  3, NULL),
+(0, '2022-01-01', 250,  	1,  8, NULL),
+(0, '2022-01-01', 150,  	1,  4, NULL),
+(0, '2022-02-01', 25,  		4,  5, NULL),
+(0, '2022-02-02', 25,  		4,  5, NULL),
+(0, '2022-02-01', 150,  	1, 	5, NULL),
+(0, '2022-12-10', 2000,  	1, 10, NULL),
+(0, '2022-12-05', 82,  		1, 	6, NULL),
+(0, '2022-02-01', 1040.38,  1, 	9, NULL);
 
 -- Views
 
@@ -322,7 +327,7 @@ END$$
 -- Category Activity Between Dates
 CREATE PROCEDURE CategoryActivityBetweenDates(fromDate DATE, toDate DATE)
 BEGIN
-SELECT  SUM(transactionAmt) as Activity, categoryName as Category
+SELECT  t.categoryID, SUM(transactionAmt) as Activity
 FROM BudgetTest.transaction t
 	join category c
     on t.categoryID = c.categoryID
@@ -332,10 +337,10 @@ FROM BudgetTest.transaction t
     on t.vendorID = v.vendorID
 WHERE NOT (t.categoryID = 2) 
 	AND transactionDate BETWEEN fromDate AND toDate
-GROUP BY categoryName;
+GROUP BY t.categoryID;
 END$$
 
--- Category Total Budgeted Between Dates
+-- Category Total Budgeted Between Dates //TODO: order should be on category id
 CREATE PROCEDURE CategoryTotalBudgetedBetweenDates(fromDate DATE, toDate DATE)
 BEGIN
 SELECT SUM(Activity) AS Activity, Category

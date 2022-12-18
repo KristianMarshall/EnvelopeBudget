@@ -108,6 +108,8 @@ class CatTransTable extends htmlTable {
         }
     }
 
+
+
     #addDataToEditableRow(rowElement) {
         let rowID = rowElement.rowIndex;
        
@@ -131,7 +133,7 @@ class CatTransTable extends htmlTable {
                     inputElement = `<input type="date" class="rowInput">`;
                     break;
                 case 1:
-                    inputElement = `<input size=10 class="rowInput">`;
+                    inputElement = `<input size=8 class="rowInput">`;
                     break;
                 case 2:   
                 case 3:
@@ -147,6 +149,57 @@ class CatTransTable extends htmlTable {
 
             cell.innerHTML = inputElement;
         });
+
+        let rowInputs = rowElement.querySelectorAll(".rowInput");
+
+        // Event listener for verifying all the inputs
+        rowInputs.forEach(input => {
+            input.addEventListener("change", event => {
+                this.#validateRow(rowElement);
+            });
+        });
+
+        //event listener for the discard button
+        cells[cells.length - 1].lastChild.addEventListener("click", event => {
+            if (this._rows[rowElement.rowIndex][0] != '')
+                this._printRow(rowElement.rowIndex);
+            else {
+                this._rows.splice(rowElement.rowIndex, 1);
+                this.#tableIds.splice(rowElement.rowIndex, 1);
+                rowElement.remove();
+            }
+        })
+
+        //event listener for the save button //TODO: cat trans save button still needs to be finished
+        cells[cells.length - 1].firstChild.addEventListener("click", event => {
+            //this.#saveDataFromEditableRow(rowElement); //FIXME: should only save if database update goes well
+            //this.#submitRow(rowElement.rowIndex);
+            //this._printRow(rowElement.rowIndex);
+        })
+    }
+
+    #validateRow(rowElement){
+        let cells = rowElement.querySelectorAll("td");
+        let valid = true;
+
+        if(new Date(cells[0].lastChild.value + "T05:00:00.000Z") == "Invalid Date")
+            valid = false;
+
+
+        if(isNaN(cells[1].lastChild.value) || Number(cells[1].lastChild.value) <= 0) //TODO: Still need to verify input precision
+            valid = false;
+
+        for (let dropdown = 1; dropdown < 3; dropdown++) 
+            if(isNaN(cells[dropdown + 1].lastChild.value) || cells[dropdown + 1].lastChild.value == "")
+                valid = false;
+
+        if(cells[2].lastChild.value == cells[3].lastChild.value )
+            valid = false;
+        
+        if(valid)
+            cells[5].firstChild.disabled = false;
+        else
+            cells[5].firstChild.disabled = true;
     }
 
     #createDropdown(typeObj, name) {

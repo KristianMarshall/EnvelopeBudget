@@ -81,28 +81,22 @@ footer{
 }
 
 /* the date and amount on transaction table */
-#transactionsTable td:nth-child(1), #transactionsTable td:nth-child(2), #transactionsTable td:nth-child(2) input, #catTransTable td:nth-child(2),#catTransTable td:nth-child(1) {
+#transactionsTable td:nth-child(1), #transactionsTable td:nth-child(2), #transactionsTable td:nth-child(2) input, #catTransTable td:nth-child(2) input, #catTransTable td:nth-child(2),#catTransTable td:nth-child(1) {
     text-align: right;
 }
 
-#transactionsTable td:nth-child(1){ /*date*/
+#transactionsTable td:nth-child(1), #catTransTable td:nth-child(1){ /*date*/
     width:8em;
 }
-#transactionsTable td:nth-child(2){ /*Account*/
-    width:7em;
+#transactionsTable td:nth-child(2), #catTransTable td:nth-child(2){ /*Amount*/
+    width:6em;
 }
-#transactionsTable td:nth-child(3){ /*Category*/
+#transactionsTable td:nth-child(n+3):nth-child(-n+5), #catTransTable td:nth-child(n+3):nth-child(-n+4){ /*Category Account Vendor*/
     width:10em;
 }
-#transactionsTable td:nth-child(4){ /*Account*/
-    width:10em;
-}
-#transactionsTable td:nth-child(5){ /*Vendor*/
-    width:10em;
-}
-#transactionsTable td:nth-child(6){ /*Memo*/
+#transactionsTable td:nth-child(6), #catTransTable td:nth-child(5){ /*Memo*/
     width:12em;
 }
-#transactionsTable td:nth-child(7){ /*Actions*/
+/* #transactionsTable td:nth-child(7){ Actions
     width:8em;
-}
+} */

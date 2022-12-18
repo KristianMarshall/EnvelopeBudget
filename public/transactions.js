@@ -200,7 +200,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
                     inputElement = `<input type="date" class="rowInput">`;
                     break;
                 case 1:
-                    inputElement = `<input size=10 class="rowInput">`;
+                    inputElement = `<input size=8 class="rowInput">`;
                     break;
                 case 2:
                 case 3:
@@ -241,9 +241,9 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             if (this._rows[rowElement.rowIndex][0] != '')
                 this._printRow(rowElement.rowIndex);
             else {
-                rowElement.remove();
                 this._rows.splice(rowElement.rowIndex, 1);
                 this.#transactionIDs.splice(rowElement.rowIndex, 1);
+                rowElement.remove();
             }
         })
 
@@ -256,7 +256,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
 
     }
 
-    #validateRow(rowElement){
+    #validateRow(rowElement){ 
         let cells = rowElement.querySelectorAll("td");
         let valid = true;
 
@@ -264,7 +264,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             valid = false;
 
 
-        if(isNaN(cells[1].lastChild.value))
+        if(isNaN(cells[1].lastChild.value)) //TODO: Still need to verify input precision
             valid = false;
 
         for (let dropdown = 1; dropdown < 3; dropdown++) 
