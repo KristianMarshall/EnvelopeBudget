@@ -26,7 +26,7 @@ app.get('/TransactionsJson', (req, res) => {
     }
   });
 
-  let transactionsQuery = querySql("SELECT * FROM Transactions");
+  let transactionsQuery = querySql("SELECT * FROM Transactions"); //TODO: should convert to multiple query
   let categoriesQuery = querySql("SELECT categoryID as id, categoryName as name FROM category");
   let accountsQuery = querySql("SELECT accountID as id, accountName as name FROM BudgetTest.account");
   let vendorsQuery = querySql("SELECT vendorID as id, vendorName as name FROM vendor");
@@ -58,7 +58,10 @@ app.get('/categoryTransfersJson', (req, res) => {
     }
   });
 
-  con.query("SELECT * FROM CategoryTransfers;", (error, result) => {
+  con.query(`
+  SELECT * FROM CategoryTransfers; 
+  SELECT categoryID as id, categoryName as name FROM category;`, 
+  (error, result) => {
     res.json(result);
   });
 
@@ -126,9 +129,26 @@ app.post('/transactionSubmitJson', (req, res) => {
   
 });
 
+app.post('/catTransSubmitJson', (req, res) => {
+  updateOrAddCatTrans(res, req);
+});
+
 app.post('/transactionDeleteJson', (req, res) => {
 
   let query = "DELETE FROM transaction WHERE transactionID = ?;";
+
+  let safeQuery = mysql.functions.format(query, [req.body.id]);
+
+  querySql(safeQuery).then(result => {
+      console.log(result);
+      res.json(result);
+  });
+  
+});
+
+app.post('/catTranDeleteJson', (req, res) => {
+
+  let query = "DELETE FROM categoryTransfer WHERE catTranID = ?;";
 
   let safeQuery = mysql.functions.format(query, [req.body.id]);
 
@@ -168,7 +188,40 @@ function querySql(sql) {
   });
 }
 
-function updateOrAddTransaction(res, req , vendorAddResult){
+function updateOrAddCatTrans(res, req){
+
+  let sqlData = [
+    req.body.rowData[0],        //Date
+    req.body.rowData[1],        //Amount
+    req.body.catTranIDs[1],     //Id of from Category
+    req.body.catTranIDs[2],     //Id of to Category
+    req.body.rowData[4],        //Memo
+    req.body.catTranIDs[0]  // Transaction Id
+  ];
+  
+  let query = "";
+
+  if(req.body.catTranIDs[0] !== null)
+    query = `
+    UPDATE categoryTransfer
+    SET catTranDate = ?, catTranAmt = ?, fromCategoryID = ?, toCategoryID = ?, catTranMemo = ?
+    WHERE catTranID = ?`;
+  else{
+    query = `INSERT INTO categoryTransfer VALUES
+            (0, ?, ?, ?, ?, ?)`;
+    sqlData.pop();
+  }
+
+  let safeQuery = mysql.functions.format(query, sqlData);
+
+  querySql(safeQuery).then(result => {
+      console.log(result);
+      res.json(result);
+  });
+}
+
+
+function updateOrAddTransaction(res, req, vendorAddResult){
 
   //if a new vendor was added set the vendor id to the new id
   let vendorId = vendorAddResult === undefined ? req.body.transactionIDs[3] : vendorAddResult.insertId;
