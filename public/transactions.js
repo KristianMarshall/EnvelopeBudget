@@ -141,7 +141,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             console.log(result);
             updateAccountBalances();
         });
-        this.#transactionIDs.splice(rowID,1);
+        this.#transactionIDs.splice(rowID,1); //TODO: ERROR check. dont remove the row unless the sql comes back positive
         this._rows.splice(rowID,1);
         rowElement.remove();
         
@@ -249,8 +249,8 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
 
         //event listener for the save button
         cells[cells.length - 1].firstChild.addEventListener("click", event => {
-            this.#saveDataFromEditableRow(rowElement); //FIXME: should only save if database update goes well
-            this.#submitRow(rowElement.rowIndex);
+            this.#saveDataFromEditableRow(rowElement); 
+            this.#submitRow(rowElement.rowIndex); //FIXME: should only save if database update goes well
             this._printRow(rowElement.rowIndex);
         })
 

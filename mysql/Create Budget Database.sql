@@ -247,7 +247,7 @@ GROUP BY categoryID, Category;
 CREATE VIEW Dashboard AS
 SELECT tB.categoryID, tB.category as Category, Balance, cA.Activity, tB.Activity as "Total Budgeted"
 FROM BudgetTest.CategoryTotalBudgeted tB
-	JOIN BudgetTest.CategoryActivity cA
+	LEFT JOIN BudgetTest.CategoryActivity cA
     ON cA.categoryID = tB.categoryID
     JOIN BudgetTest.CategoryBalance cB
     ON tB.categoryID = cB.categoryID;

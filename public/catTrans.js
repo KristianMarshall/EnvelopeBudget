@@ -101,11 +101,28 @@ class CatTransTable extends htmlTable {
                 });
 
                 deleteEvent.target.parentElement.querySelector("#confirm").addEventListener("click", event => {
-                    //this.#deleteRow(rowID, event.target.parentElement.parentElement);
+                    this.#deleteRow(rowID, event.target.parentElement.parentElement);
                 });
                 
             });
         }
+    }
+
+    #deleteRow(rowID, rowElement){
+        fetch("/catTranDeleteJson", {
+            method: 'post',
+            body: JSON.stringify({
+                id: this.#tableIds[rowID][0]
+            }),
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log(result);
+        });
+        this.#tableIds.splice(rowID,1); //TODO: ERROR check. dont remove the row unless the sql comes back positive
+        this._rows.splice(rowID,1);
+        rowElement.remove();
     }
 
 
@@ -172,9 +189,9 @@ class CatTransTable extends htmlTable {
 
         //event listener for the save button //TODO: cat trans save button still needs to be finished
         cells[cells.length - 1].firstChild.addEventListener("click", event => {
-            //this.#saveDataFromEditableRow(rowElement); //FIXME: should only save if database update goes well
-            //this.#submitRow(rowElement.rowIndex);
-            //this._printRow(rowElement.rowIndex);
+            this.#saveDataFromEditableRow(rowElement); 
+            this.#submitRow(rowElement.rowIndex); //FIXME: should only save if database update goes well
+            this._printRow(rowElement.rowIndex);
         })
     }
 
@@ -213,6 +230,43 @@ class CatTransTable extends htmlTable {
 
         dropdownHtml += "</select>";
         return dropdownHtml;
+    }
+
+    #saveDataFromEditableRow(rowElement) {
+        let cells = rowElement.querySelectorAll("td");
+
+        this._rows[rowElement.rowIndex][0] = new Date(cells[0].lastChild.value + "T05:00:00.000Z");
+        this._rows[rowElement.rowIndex][1] = Number(cells[1].lastChild.value); //Amount
+
+        //This pulls the data in from Category and Account
+        for (let dropdown = 1; dropdown < 3; dropdown++) {
+            let id = Number(cells[dropdown + 1].lastChild.value)
+            this.#tableIds[rowElement.rowIndex][dropdown] = id == 0 ? null : id;
+
+            let name = cells[dropdown + 1].lastChild.selectedOptions[0].innerHTML;
+            this._rows[rowElement.rowIndex][dropdown + 1] = id == 0 ? null : name;
+        }
+
+        let memo = cells[4].lastChild.value;
+        this._rows[rowElement.rowIndex][4] = memo == "" ? null : memo;
+    }
+
+    #submitRow(rowID) {
+        let rowData = this._rows[rowID].slice(0, 5);
+        rowData[0] = rowData[0].toLocaleString("en-CA", { timeZone: "America/Toronto" }).split(",")[0];
+        fetch("/catTransSubmitJson", {
+            method: 'post',
+            body: JSON.stringify({
+                catTranIDs: this.#tableIds[rowID],
+                rowData: rowData
+            }),
+            headers: { 'Content-Type': 'application/json' }
+        })
+            .then(response => response.json())
+            .then(result => {
+                console.log(result); //TODO: error check
+                
+            });
     }
 
     _addRow(rowData) {
