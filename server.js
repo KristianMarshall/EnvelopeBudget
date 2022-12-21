@@ -5,7 +5,7 @@ app.use(express.static("public"));
 app.use(express.json());
 app.set('view engine', 'ejs');
 
-const mysql = require("./mysql/auth");
+const queries = require('./mysql/queries');
 
 const PORT = 3000;
 
@@ -18,20 +18,8 @@ app.get('/Transactions', (req, res) => {
 });
 
 app.get('/TransactionsJson', (req, res) => {
-  let con = mysql.getCon(); 
 
-  con.connect(function (error) {
-    if (error) {
-      return console.error(error);
-    }
-  });
-
-  let transactionsQuery = querySql("SELECT * FROM Transactions"); //TODO: should convert to multiple query
-  let categoriesQuery = querySql("SELECT categoryID as id, categoryName as name FROM category");
-  let accountsQuery = querySql("SELECT accountID as id, accountName as name FROM BudgetTest.account");
-  let vendorsQuery = querySql("SELECT vendorID as id, vendorName as name FROM vendor");
-
-  Promise.all([transactionsQuery, categoriesQuery, accountsQuery, vendorsQuery])
+  queries.getTransactionTableData()
   .then(queriesData =>{
     res.json({
       transactions: queriesData[0],
@@ -40,9 +28,6 @@ app.get('/TransactionsJson', (req, res) => {
       vendors:      queriesData[3],
     });
   });
-  
-  con.end();
-
 });
 
 app.get('/CategoryTransfers', (req, res) => {
@@ -50,54 +35,23 @@ app.get('/CategoryTransfers', (req, res) => {
 });
 
 app.get('/categoryTransfersJson', (req, res) => {
-  let con = mysql.getCon(); //TODO: should use the sqlQuery function
 
-  con.connect(function (error) {
-    if (error) {
-      return console.error(error);
-    }
+  queries.getCatTransTableData().then(queriesData => {
+    res.json(queriesData);
   });
-
-  con.query(`
-  SELECT * FROM CategoryTransfers; 
-  SELECT categoryID as id, categoryName as name FROM category;`, 
-  (error, result) => {
-    res.json(result);
-  });
-
-  con.end();
-
 });
 
 app.get('/AccountBalanceJson', (req, res) => {
-  let con = mysql.getCon(); //TODO: should use the sqlQuery function
 
-  con.connect(function (error) {
-    if (error) {
-      return console.error(error);
-    }
-  });
-
-  con.query("SELECT * FROM AccountBalance;", (error, result) => {
+  queries.getAccountBalanceData().then( result => {
     res.json(result);
   });
-
-  con.end();
-
 });
 
 app.get('/DashboardJson', (req, res) => {
-  let con = mysql.getCon(); //TODO: should use the sqlQuery function
-  
-  con.connect(function (error) {
-    if (error) {
-      return console.error(error);
-    }
-  });
-  con.query("SELECT * FROM Dashboard;", (error, result) => {
+  queries.getDashboardTableData(req.query.month).then( result => {
     res.json(result);
   });
-  con.end();
 });
 
 app.get('/githubPull', (req, res) => {
@@ -119,140 +73,44 @@ app.post('/transactionSubmitJson', (req, res) => {
 
   //if a new vendor was added we need to add it to the database before adding/updating the transaction
   if(req.body.transactionIDs[3] === -1){
-    querySql(mysql.functions.format(`INSERT INTO vendor VALUES (0, ?)`, [req.body.rowData[4]]))
-    .then(result => {
-      console.log(result);
-      updateOrAddTransaction(res, req, result);
+    queries.addNewVendor(req.body.rowData[4]).then(vendorAddResult => {
+      console.log(vendorAddResult);
+      queries.updateOrAddTransaction(req.body, vendorAddResult)
+      .then(result => returnTransactionResult(res, result, vendorAddResult));
     });
   } else 
-    updateOrAddTransaction(res, req);
-  
+      queries.updateOrAddTransaction(req.body)
+      .then(result => returnTransactionResult(res, result));
 });
 
+function returnTransactionResult(res, transactionResult, vendorAddResult){
+      console.log(transactionResult);
+      res.json({transactionResult: transactionResult, vendorResult: vendorAddResult});
+}
+
 app.post('/catTransSubmitJson', (req, res) => {
-  updateOrAddCatTrans(res, req);
+  queries.updateOrAddCatTrans(req.body).then(result => {
+    console.log(result);
+    res.json(result);
+  });
 });
 
 app.post('/transactionDeleteJson', (req, res) => {
 
-  let query = "DELETE FROM transaction WHERE transactionID = ?;";
-
-  let safeQuery = mysql.functions.format(query, [req.body.id]);
-
-  querySql(safeQuery).then(result => {
-      console.log(result);
-      res.json(result);
+  queries.deleteTransaction(req.body.id).then(result => {
+    console.log(result);
+    res.json(result);
   });
-  
 });
 
 app.post('/catTranDeleteJson', (req, res) => {
 
-  let query = "DELETE FROM categoryTransfer WHERE catTranID = ?;";
-
-  let safeQuery = mysql.functions.format(query, [req.body.id]);
-
-  querySql(safeQuery).then(result => {
+  queries.deleteCatTransfer(req.body.id).then(result => {
       console.log(result);
       res.json(result);
   });
-  
 });
-
-
 
 app.listen(PORT, () => {
   console.log(`Node Started`);
 });
-
-function querySql(sql) {
-  let con = mysql.getCon();
-
-  con.connect(function(error) {
-      if (error) {
-        return console.error(error);
-      } 
-    });
-
-  return new Promise((resolve, reject) => {
-      con.query(sql, (error, sqlResult) => {
-          if(error) {
-            console.log(error);  //WAS: return reject(error);
-            return resolve(error);
-          }           
-
-          return resolve(sqlResult);
-      });
-
-      con.end();
-  });
-}
-
-function updateOrAddCatTrans(res, req){
-
-  let sqlData = [
-    req.body.rowData[0],        //Date
-    req.body.rowData[1],        //Amount
-    req.body.catTranIDs[1],     //Id of from Category
-    req.body.catTranIDs[2],     //Id of to Category
-    req.body.rowData[4],        //Memo
-    req.body.catTranIDs[0]  // Transaction Id
-  ];
-  
-  let query = "";
-
-  if(req.body.catTranIDs[0] !== null)
-    query = `
-    UPDATE categoryTransfer
-    SET catTranDate = ?, catTranAmt = ?, fromCategoryID = ?, toCategoryID = ?, catTranMemo = ?
-    WHERE catTranID = ?`;
-  else{
-    query = `INSERT INTO categoryTransfer VALUES
-            (0, ?, ?, ?, ?, ?)`;
-    sqlData.pop();
-  }
-
-  let safeQuery = mysql.functions.format(query, sqlData);
-
-  querySql(safeQuery).then(result => {
-      console.log(result);
-      res.json(result);
-  });
-}
-
-
-function updateOrAddTransaction(res, req, vendorAddResult){
-
-  //if a new vendor was added set the vendor id to the new id
-  let vendorId = vendorAddResult === undefined ? req.body.transactionIDs[3] : vendorAddResult.insertId;
-
-  let sqlData = [
-    req.body.rowData[0],        //Date
-    req.body.rowData[1],        //Amount
-    req.body.transactionIDs[1], //Id of Category
-    req.body.transactionIDs[2], //Id of Account
-    vendorId,                   //Id of Vendor
-    req.body.rowData[5],        //Memo
-    req.body.transactionIDs[0]  // Transaction Id
-  ];
-  
-  let query = "";
-
-  if(req.body.transactionIDs[0] !== null)
-    query = `
-    UPDATE transaction
-    SET transactionDate = ?, transactionAmt = ?, categoryID = ?, accountID = ?, vendorID = ?, transactionMemo = ?
-    WHERE transactionID = ?`;
-  else{
-    query = `INSERT INTO transaction VALUES
-            (0, ?, ?, ?, ?, ?, ?, DEFAULT)`;
-    sqlData.pop();
-  }
-
-  let safeQuery = mysql.functions.format(query, sqlData);
-
-  querySql(safeQuery).then(result => {
-      console.log(result);
-      res.json({transactionResult: result, vendorResult: vendorAddResult});
-  });
-}
