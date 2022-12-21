@@ -18,7 +18,6 @@ window.addEventListener("load", event => {
 class TransactionTable extends htmlTable { //TODO: should make rows and cells their own classes
     #transactionIDs = [];
     #notsurewhattocallit;
-    colsToHide = 4;
     #actionButtons = `
         <input type="button" value="Edit" class="edit btn btn-dark btn-sm">
         <input type="button" value="Delete" class="delete btn btn-dark btn-sm">
@@ -142,7 +141,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             console.log(result);
             updateAccountBalances();
         });
-        this.#transactionIDs.splice(rowID,1);
+        this.#transactionIDs.splice(rowID,1); //TODO: ERROR check. dont remove the row unless the sql comes back positive
         this._rows.splice(rowID,1);
         rowElement.remove();
         
@@ -201,7 +200,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
                     inputElement = `<input type="date" class="rowInput">`;
                     break;
                 case 1:
-                    inputElement = `<input size=10 class="rowInput">`;
+                    inputElement = `<input size=8 class="rowInput">`;
                     break;
                 case 2:
                 case 3:
@@ -250,14 +249,14 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
 
         //event listener for the save button
         cells[cells.length - 1].firstChild.addEventListener("click", event => {
-            this.#saveDataFromEditableRow(rowElement); //FIXME: should only save if database update goes well
-            this.#submitRow(rowElement.rowIndex);
+            this.#saveDataFromEditableRow(rowElement); 
+            this.#submitRow(rowElement.rowIndex); //FIXME: should only save if database update goes well
             this._printRow(rowElement.rowIndex);
         })
 
     }
 
-    #validateRow(rowElement){
+    #validateRow(rowElement){ 
         let cells = rowElement.querySelectorAll("td");
         let valid = true;
 
@@ -265,7 +264,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             valid = false;
 
 
-        if(isNaN(cells[1].lastChild.value))
+        if(isNaN(cells[1].lastChild.value)) //TODO: Still need to verify input precision
             valid = false;
 
         for (let dropdown = 1; dropdown < 3; dropdown++) 
