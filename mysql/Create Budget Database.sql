@@ -362,5 +362,74 @@ FROM (	SELECT categoryID, SUM(catTranAmt) as Activity, tC.categoryName as Catego
 GROUP BY Category, categoryID;
 END$$
 
+-- Dashboard Table at a given date 
+CREATE PROCEDURE getDashboardTable(dateMonth DATE)
+BEGIN
+SET @toDate = LAST_DAY(dateMonth), @fromDate = DATE_SUB(dateMonth, INTERVAL DAYOFMONTH(dateMonth)-1 DAY);
+SELECT dateMonth as Date, @fromDate as "Start Date", @toDate as "End Date";
+SELECT category.categoryID, category.categoryName as Envelope, cB.Balance, Activity, totalBudgeted as "Total Budgeted"
+FROM category
+LEFT JOIN
+(SELECT  t.categoryID, SUM(transactionAmt) as Activity
+FROM BudgetTest.transaction t
+join category c
+	on t.categoryID = c.categoryID
+	join account a
+	on t.accountID = a.accountID
+	left join vendor v
+	on t.vendorID = v.vendorID
+WHERE NOT (t.categoryID = 2) 
+AND transactionDate BETWEEN @fromDate AND @toDate
+GROUP BY t.categoryID) as activityTable
+ON category.categoryID = activityTable.categoryID
+LEFT JOIN
+(SELECT categoryID, SUM(Activity) AS totalBudgeted
+FROM (	SELECT categoryID, SUM(catTranAmt) as Activity
+	FROM BudgetTest.categoryTransfer cT
+		join category tC
+		on cT.toCategoryID = tC.categoryID
+	WHERE catTranDate BETWEEN @fromDate AND @toDate
+	GROUP BY categoryID
+		UNION
+	SELECT categoryID, SUM(catTranAmt)*-1 as Activity
+	FROM BudgetTest.categoryTransfer cT
+		join category fC
+		on cT.fromCategoryID = fC.categoryID
+	WHERE catTranDate BETWEEN @fromDate AND @toDate
+	GROUP BY categoryID) as AlmostCategoryBalances
+GROUP BY categoryID) as totalBudgetedTable
+ON category.categoryID = totalBudgetedTable.categoryID
+LEFT JOIN 
+(SELECT categoryID, SUM(Activity) as Balance
+FROM	(SELECT  c.categoryID, SUM(transactionAmt) as Activity
+		 FROM BudgetTest.transaction t
+			join category c
+			on t.categoryID = c.categoryID
+			join account a
+			on t.accountID = a.accountID
+			left join vendor v
+			on t.vendorID = v.vendorID
+		 WHERE NOT (t.categoryID = 2) 
+			AND transactionDate <= @toDate
+		 GROUP BY c.categoryID
+				UNION
+		SELECT  tC.categoryID, SUM(catTranAmt) as Activity
+		FROM BudgetTest.categoryTransfer cT
+			join category tC
+			on cT.toCategoryID = tC.categoryID
+		WHERE catTranDate <= @toDate
+		GROUP BY tC.categoryID
+				UNION
+		SELECT  fC.categoryID, SUM(catTranAmt)*-1 as Activity
+		FROM BudgetTest.categoryTransfer cT
+			join category fC
+			on cT.fromCategoryID = fC.categoryID
+		WHERE catTranDate <= @toDate
+		GROUP BY fC.categoryID
+		) as AlmostCategoryBalance
+GROUP BY categoryID) as cB
+ON category.categoryID = cB.categoryID
+WHERE NOT category.categoryID = 2;
+END$$
 
 DELIMITER ;

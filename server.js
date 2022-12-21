@@ -49,8 +49,8 @@ app.get('/AccountBalanceJson', (req, res) => {
 });
 
 app.get('/DashboardJson', (req, res) => {
-  queries.getDashboardTableData().then( result => {
-    res.json(result[1]);
+  queries.getDashboardTableData(req.query.month).then( result => {
+    res.json(result);
   });
 });
 
