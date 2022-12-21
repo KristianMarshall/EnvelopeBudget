@@ -50,7 +50,7 @@ app.get('/AccountBalanceJson', (req, res) => {
 
 app.get('/DashboardJson', (req, res) => {
   queries.getDashboardTableData().then( result => {
-    res.json(result);
+    res.json(result[1]);
   });
 });
 

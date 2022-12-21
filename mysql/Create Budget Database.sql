@@ -116,7 +116,8 @@ INSERT INTO category VALUES
 (0, 'Vacation', 			DEFAULT, 200,		 3, NULL, 6),
 (0, 'Groceries', 			DEFAULT, 200,		 3, NULL, 2),
 (0, 'Rent', 				DEFAULT, 1040.72,	 3, NULL, 2),
-(0, 'Emergency Fund', 		DEFAULT, 75,		 3, NULL, 6);
+(0, 'Emergency Fund', 		DEFAULT, 75,		 3, NULL, 6),
+(0, 'Internet', 			DEFAULT, 101.64,	 2, NULL, 4);
 
 -- accountID, accountName, accountHidden
 INSERT INTO account VALUES 
@@ -235,13 +236,13 @@ GROUP BY Category, categoryID;
 
 -- Category Balance VIEW
 CREATE VIEW CategoryBalance AS
-SELECT categoryID, SUM(Activity) as Balance, Category
-FROM	(SELECT categoryID, Activity, Category
+SELECT categoryID, SUM(Activity) as Balance
+FROM	(SELECT categoryID, Activity
 		FROM CategoryActivity
 			UNION
-		SELECT categoryID, Activity, Category
+		SELECT categoryID, Activity
 		FROM CategoryTotalBudgeted) as AlmostCategoryBalance
-GROUP BY categoryID, Category;
+GROUP BY categoryID;
 
 -- Dashboard VIEW
 CREATE VIEW Dashboard AS
@@ -343,22 +344,22 @@ END$$
 -- Category Total Budgeted Between Dates //TODO: order should be on category id
 CREATE PROCEDURE CategoryTotalBudgetedBetweenDates(fromDate DATE, toDate DATE)
 BEGIN
-SELECT SUM(Activity) AS Activity, Category
-FROM (	SELECT SUM(catTranAmt) as Activity, tC.categoryName as Category
+SELECT categoryID, SUM(Activity) AS "Total Budgeted", Category
+FROM (	SELECT categoryID, SUM(catTranAmt) as Activity, tC.categoryName as Category
 		FROM BudgetTest.categoryTransfer cT
 			join category tC
 			on cT.toCategoryID = tC.categoryID
 		WHERE catTranDate BETWEEN fromDate AND toDate
-		GROUP BY Category
+		GROUP BY Category, categoryID
 			UNION
-		SELECT SUM(catTranAmt)*-1 as Activity, fC.categoryName as Category
+		SELECT categoryID, SUM(catTranAmt)*-1 as Activity, fC.categoryName as Category
 		FROM BudgetTest.categoryTransfer cT
 			join category fC
 			on cT.fromCategoryID = fC.categoryID
 		WHERE catTranDate BETWEEN fromDate AND toDate
-		GROUP BY Category
+		GROUP BY Category, categoryID
 	  ) as AlmostCategoryBalances
-GROUP BY Category;
+GROUP BY Category, categoryID;
 END$$
 
 

@@ -14,7 +14,7 @@ window.addEventListener("load", event => {
         }
         tableHTML += "</tr>\n";
 
-        for (let i = 1; i < data.length; i++) {
+        for (let i = 0; i < data.length; i++) {
             tableHTML += "<tr>\n";
             for (let j = 1; j < headings.length; j++) {
                 rowData = data[i][headings[j]];
