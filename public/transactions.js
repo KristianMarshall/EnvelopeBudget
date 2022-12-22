@@ -61,17 +61,20 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         document.querySelector("#submitAll").addEventListener("click" , event => {
             let editableRows = [];
 
-            document.querySelector("tr").forEach(row => {
-                //TODO: check if there is a row input
+            document.querySelectorAll("tr").forEach(row => {
+                if(row.querySelector(".rowinput") !== null)
+                    editableRows.push(row);
             });
-            //run a validate as well
-            //this.#saveButtonClick()
-            console.log("Submit button click");
+
+            editableRows.forEach(row => {
+                this.#saveButtonClick(row);
+            });
         });
 
         document.querySelector("#addRow").addEventListener("click", event => {
             this._addRow();
             this.#makeEditableRow([...document.querySelectorAll("tr")][1]);
+            document.querySelector("#submitAll").disabled = true;
         });
     }
 
@@ -115,6 +118,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         //if a new row is added it will be blank and imminently switched to an editable row so the buttons aren't needed
         if (editButton != null) {
             editButton.addEventListener("click", event => {
+                document.querySelector("#submitAll").disabled = true;
                 let tableRowElement = event.path[2];
                 this.#makeEditableRow(tableRowElement);
                 this.#addDataToEditableRow(tableRowElement);
@@ -288,9 +292,10 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             if(isNaN(cells[dropdown + 1].lastChild.value) || cells[dropdown + 1].lastChild.value == "")
                 valid = false;
 
-
+        //enable the button if all the data is valid
         cells[6].firstChild.disabled = !valid;
 
+        //enable the submit all button if all the save buttons are clickable
         let allSaveButtons = true;
 
         document.querySelectorAll(".saveButton").forEach(saveButton => {
@@ -315,6 +320,9 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             .then(response => response.json())
             .then(result => {
                 console.log(result); //TODO: error check
+
+                if(this.#transactionIDs[rowID][0] === null)
+                    this.#transactionIDs[rowID][0] = result.transactionResult.insertId;
 
                 //if a vendor was added then add the new vendor to the local array of vendors
                 if(result.vendorResult !== undefined){
