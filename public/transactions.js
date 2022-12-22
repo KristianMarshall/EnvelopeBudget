@@ -57,6 +57,18 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         }
 
         this._printTable();
+
+        document.querySelector("#submitAll").addEventListener("click" , event => {
+            let editableRows = [];
+
+            document.querySelector("tr").forEach(row => {
+                //TODO: check if there is a row input
+            });
+            //run a validate as well
+            //this.#saveButtonClick()
+            console.log("Submit button click");
+        });
+
         document.querySelector("#addRow").addEventListener("click", event => {
             this._addRow();
             this.#makeEditableRow([...document.querySelectorAll("tr")][1]);
@@ -211,7 +223,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
                     inputElement = `<input size=21 class="rowInput">`;
                     break;
                 case 6:
-                    inputElement = `<input type="button" value="Save" disabled>\n<input type="button" value="Discard">`;
+                    inputElement = `<input type="button" class="saveButton" value="Save" disabled>\n<input type="button" value="Discard">`;
                     break;
             }
 
@@ -249,15 +261,20 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
 
         //event listener for the save button
         cells[cells.length - 1].firstChild.addEventListener("click", event => {
-            this.#saveDataFromEditableRow(rowElement); 
-            this.#submitRow(rowElement.rowIndex); //FIXME: should only save if database update goes well
-            this._printRow(rowElement.rowIndex);
+            this.#saveButtonClick(rowElement);
         })
 
     }
 
+    #saveButtonClick(rowElement){
+        this.#saveDataFromEditableRow(rowElement); 
+        this.#submitRow(rowElement.rowIndex); //FIXME: should only save if database update goes well
+        this._printRow(rowElement.rowIndex);
+    }
+
     #validateRow(rowElement){ 
         let cells = rowElement.querySelectorAll("td");
+        let submitAllButton = document.querySelector("#submitAll");
         let valid = true;
 
         if(new Date(cells[0].lastChild.value + "T05:00:00.000Z") == "Invalid Date")
@@ -271,10 +288,17 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             if(isNaN(cells[dropdown + 1].lastChild.value) || cells[dropdown + 1].lastChild.value == "")
                 valid = false;
 
-        if(valid)
-            cells[6].firstChild.disabled = false;
-        else
-            cells[6].firstChild.disabled = true;
+
+        cells[6].firstChild.disabled = !valid;
+
+        let allSaveButtons = true;
+
+        document.querySelectorAll(".saveButton").forEach(saveButton => {
+            if(saveButton.disabled)
+                allSaveButtons = false;
+        });
+
+        document.querySelector("#submitAll").disabled = !allSaveButtons;
     }
 
     #submitRow(rowID) {
