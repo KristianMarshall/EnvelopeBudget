@@ -57,9 +57,24 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         }
 
         this._printTable();
+
+        document.querySelector("#submitAll").addEventListener("click" , event => {
+            let editableRows = [];
+
+            document.querySelectorAll("tr").forEach(row => {
+                if(row.querySelector(".rowinput") !== null)
+                    editableRows.push(row);
+            });
+
+            editableRows.forEach(row => {
+                this.#saveButtonClick(row);
+            });
+        });
+
         document.querySelector("#addRow").addEventListener("click", event => {
             this._addRow();
             this.#makeEditableRow([...document.querySelectorAll("tr")][1]);
+            document.querySelector("#submitAll").disabled = true;
         });
     }
 
@@ -103,6 +118,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         //if a new row is added it will be blank and imminently switched to an editable row so the buttons aren't needed
         if (editButton != null) {
             editButton.addEventListener("click", event => {
+                document.querySelector("#submitAll").disabled = true;
                 let tableRowElement = event.path[2];
                 this.#makeEditableRow(tableRowElement);
                 this.#addDataToEditableRow(tableRowElement);
@@ -211,7 +227,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
                     inputElement = `<input size=21 class="rowInput">`;
                     break;
                 case 6:
-                    inputElement = `<input type="button" value="Save" disabled>\n<input type="button" value="Discard">`;
+                    inputElement = `<input type="button" class="saveButton" value="Save" disabled>\n<input type="button" value="Discard">`;
                     break;
             }
 
@@ -249,15 +265,20 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
 
         //event listener for the save button
         cells[cells.length - 1].firstChild.addEventListener("click", event => {
-            this.#saveDataFromEditableRow(rowElement); 
-            this.#submitRow(rowElement.rowIndex); //FIXME: should only save if database update goes well
-            this._printRow(rowElement.rowIndex);
+            this.#saveButtonClick(rowElement);
         })
 
     }
 
+    #saveButtonClick(rowElement){
+        this.#saveDataFromEditableRow(rowElement); 
+        this.#submitRow(rowElement.rowIndex); //FIXME: should only save if database update goes well
+        this._printRow(rowElement.rowIndex);
+    }
+
     #validateRow(rowElement){ 
         let cells = rowElement.querySelectorAll("td");
+        let submitAllButton = document.querySelector("#submitAll");
         let valid = true;
 
         if(new Date(cells[0].lastChild.value + "T05:00:00.000Z") == "Invalid Date")
@@ -271,10 +292,18 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             if(isNaN(cells[dropdown + 1].lastChild.value) || cells[dropdown + 1].lastChild.value == "")
                 valid = false;
 
-        if(valid)
-            cells[6].firstChild.disabled = false;
-        else
-            cells[6].firstChild.disabled = true;
+        //enable the button if all the data is valid
+        cells[6].firstChild.disabled = !valid;
+
+        //enable the submit all button if all the save buttons are clickable
+        let allSaveButtons = true;
+
+        document.querySelectorAll(".saveButton").forEach(saveButton => {
+            if(saveButton.disabled)
+                allSaveButtons = false;
+        });
+
+        document.querySelector("#submitAll").disabled = !allSaveButtons;
     }
 
     #submitRow(rowID) {
@@ -291,6 +320,9 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             .then(response => response.json())
             .then(result => {
                 console.log(result); //TODO: error check
+
+                if(this.#transactionIDs[rowID][0] === null)
+                    this.#transactionIDs[rowID][0] = result.transactionResult.insertId;
 
                 //if a vendor was added then add the new vendor to the local array of vendors
                 if(result.vendorResult !== undefined){

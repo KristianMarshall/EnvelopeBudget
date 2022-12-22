@@ -39,9 +39,23 @@ class CatTransTable extends htmlTable {
         this.#tableIds =  jsonData[0].map(t => Object.entries(t).map(d => d[1]).slice(0, 3)); //Same thing as above but grabs the other part of the array
         this.#tableIds.unshift(idHeadings);
 
+        document.querySelector("#submitAll").addEventListener("click" , event => {
+            let editableRows = [];
+
+            document.querySelectorAll("tr").forEach(row => {
+                if(row.querySelector(".rowinput") !== null)
+                    editableRows.push(row);
+            });
+
+            editableRows.forEach(row => {
+                this.#saveButtonClick(row);
+            });
+        });
+
         document.querySelector("#addRow").addEventListener("click", event => {
             this._addRow();
             this.#makeEditableRow([...document.querySelectorAll("tr")][1]);
+            document.querySelector("#submitAll").disabled = true;
         });
     }
 
@@ -84,6 +98,7 @@ class CatTransTable extends htmlTable {
         //if a new row is added it will be blank and imminently switched to an editable row so the buttons aren't needed
         if (editButton != null) {
             editButton.addEventListener("click", event => {
+                document.querySelector("#submitAll").disabled = true;
                 let tableRowElement = event.path[2];
                 this.#makeEditableRow(tableRowElement);
                 this.#addDataToEditableRow(tableRowElement);
@@ -160,7 +175,7 @@ class CatTransTable extends htmlTable {
                     inputElement = `<input size=21 class="rowInput">`;
                     break;
                 case 5:
-                    inputElement = `<input type="button" value="Save" disabled>\n<input type="button" value="Discard">`;
+                    inputElement = `<input type="button" class="saveButton" value="Save" disabled>\n<input type="button" value="Discard">`;
                     break;
             }
 
@@ -187,12 +202,16 @@ class CatTransTable extends htmlTable {
             }
         })
 
-        //event listener for the save button //TODO: cat trans save button still needs to be finished
+        //event listener for the save button
         cells[cells.length - 1].firstChild.addEventListener("click", event => {
-            this.#saveDataFromEditableRow(rowElement); 
-            this.#submitRow(rowElement.rowIndex); //FIXME: should only save if database update goes well
-            this._printRow(rowElement.rowIndex);
+            this.#saveButtonClick(rowElement);
         })
+    }
+
+    #saveButtonClick(rowElement){
+        this.#saveDataFromEditableRow(rowElement); 
+        this.#submitRow(rowElement.rowIndex); //FIXME: should only save if database update goes well
+        this._printRow(rowElement.rowIndex);
     }
 
     #validateRow(rowElement){
@@ -213,10 +232,18 @@ class CatTransTable extends htmlTable {
         if(cells[2].lastChild.value == cells[3].lastChild.value )
             valid = false;
         
-        if(valid)
-            cells[5].firstChild.disabled = false;
-        else
-            cells[5].firstChild.disabled = true;
+        //enable the button if all the data is valid
+        cells[5].firstChild.disabled = !valid;
+
+        //enable the submit all button if all the save buttons are clickable
+        let allSaveButtons = true;
+
+        document.querySelectorAll(".saveButton").forEach(saveButton => {
+            if(saveButton.disabled)
+                allSaveButtons = false;
+        });
+
+        document.querySelector("#submitAll").disabled = !allSaveButtons;
     }
 
     #createDropdown(typeObj, name) {
@@ -265,7 +292,8 @@ class CatTransTable extends htmlTable {
             .then(response => response.json())
             .then(result => {
                 console.log(result); //TODO: error check
-                
+                if(this.#tableIds[rowID][0] === null)
+                    this.#tableIds[rowID][0] = result.insertId;
             });
     }
 
