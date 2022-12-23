@@ -13,7 +13,7 @@ function updateTable() {
 
         tableHTML += "<tr>\n";
         for (let i = 1; i < headings.length; i++) {
-            tableHTML += `<th>${headings[i]}</th>\n`;
+            tableHTML += `<th scope="col">${headings[i]}</th>\n`;
         }
         tableHTML += "</tr>\n";
 
