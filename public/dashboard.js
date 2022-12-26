@@ -49,3 +49,8 @@ document.querySelector("#nextMonth").addEventListener("click", event => {
     monthDelta--;
     updateTable();
 });
+
+document.querySelector("#thisMonth").addEventListener("click", event => {
+    monthDelta = 0;
+    updateTable();
+});

@@ -11,8 +11,10 @@ class CatTransTable extends htmlTable {
     #tableIds = [];
     #categories;
     #actionButtons = `
-        <input type="button" value="Edit" class="edit">
-        <input type="button" value="Delete" class="delete">
+        <div class="btn-group" role="group">
+            <input type="button" value="Edit" class="edit btn btn-sm btn-outline-secondary">
+            <input type="button" value="Delete" class="delete btn btn-sm btn-outline-secondary">
+        </div>
         `;
     constructor(tableElement, jsonData) {
         let tableData = jsonData[0];
@@ -23,8 +25,10 @@ class CatTransTable extends htmlTable {
         tableData.map(row => row[0] = new Date(row[0])); //Sets all the date rows as a date object
         
         let actionButtons = `
-        <input type="button" value="Edit" class="edit">
-        <input type="button" value="Delete" class="delete">
+        <div class="btn-group" role="group">
+            <input type="button" value="Edit" class="edit btn btn-sm btn-outline-secondary">
+            <input type="button" value="Delete" class="delete btn btn-sm btn-outline-secondary">
+        </div>
         `;
         tableData.map(row => row.push(actionButtons));
 
@@ -84,14 +88,15 @@ class CatTransTable extends htmlTable {
         //if a new row is added it will be blank and imminently switched to an editable row so the buttons aren't needed
         if (editButton != null) {
             editButton.addEventListener("click", event => {
-                let tableRowElement = event.path[2];
+                let tableRowElement = event.path[3];
                 this.#makeEditableRow(tableRowElement);
                 this.#addDataToEditableRow(tableRowElement);
             });
 
-            //TODO: need to center these buttons
             deleteButton.addEventListener("click", deleteEvent => {
-                deleteEvent.target.insertAdjacentHTML("afterend", `<input id="cancel" type="button" value="Cancel"><input id="confirm" type="button" value="Confirm">`);
+                deleteEvent.target.insertAdjacentHTML("afterend", `
+                <input id="cancel" type="button" value="Cancel" class="btn btn-sm btn-outline-secondary">
+                <input id="confirm" type="button" value="Confirm" class="btn btn-sm btn-outline-secondary">`);
                 deleteEvent.target.hidden = true;
 
                 deleteEvent.target.parentElement.querySelector("#cancel").addEventListener("click", event => {
@@ -101,7 +106,7 @@ class CatTransTable extends htmlTable {
                 });
 
                 deleteEvent.target.parentElement.querySelector("#confirm").addEventListener("click", event => {
-                    this.#deleteRow(rowID, event.target.parentElement.parentElement);
+                    this.#deleteRow(rowID, event.target.parentElement.parentElement); //TODO: switch to a event.path
                 });
                 
             });
@@ -160,7 +165,11 @@ class CatTransTable extends htmlTable {
                     inputElement = `<input size=21 class="rowInput">`;
                     break;
                 case 5:
-                    inputElement = `<input type="button" value="Save" disabled>\n<input type="button" value="Discard">`;
+                    inputElement = `
+                    <div class="btn-group" role="group">
+                        <input type="button" value="Save" class="btn btn-sm btn-outline-secondary" disabled>
+                        <input type="button" value="Discard" class="btn btn-sm btn-outline-secondary">
+                    </div>`;
                     break;
             }
 
@@ -221,7 +230,7 @@ class CatTransTable extends htmlTable {
 
     #createDropdown(typeObj, name) {
         let dropdownHtml = `
-        <select class="rowInput">
+        <select class="rowInput form-select form-select-sm">
             <option value=""> -- Select a ${name} -- </option>`;
 
         typeObj.forEach(object => {

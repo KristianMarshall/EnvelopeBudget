@@ -1,26 +1,30 @@
 <%- include('./partials/header', { title: "Category Transfers - EB" }); %>
 
-<div class="page">
-    <div id="leftbar">
-        <!--<h3>Maybe Category Balances?</h3>-->
-        <div id="AB"></div>
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+    <div
+        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Category Transfers</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group" role="group">
+                <button type="button" id="addRow" class="btn btn-sm btn-outline-secondary">Add Row</button>
+                <button type="button" id="submitAll" class="btn btn-sm btn-outline-secondary">Submit All</button>
+            </div>
+        </div>
     </div>
-    <div id="content">
-        <input type="button" value="Add Row" id="addRow">
-        <input type="button" value="Submit All" id="submitAll">
-        <table id="catTransTable"  class="table table-hover table-striped table-dark">
+
+    <div class="table-responsive">
+        <table id="catTransTable" class="table table-striped table-hover table-sm">
             <thead>
                 <tr>
-                    <th>Still Loading</th>
+                    <th>Loading...</th>
                 </tr>
             </thead>
             <tbody>
-
             </tbody>
-        </table>
-        <!--<p> maybe just have category transfers as a quick feature on the dashboard?</p>-->
     </div>
+</main>
 </div>
-
+</div>
+<script src="main.js"></script>
 <script type="text/javascript" src="catTrans.js"></script>
 <%- include('./partials/footer'); %>
