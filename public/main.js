@@ -2,7 +2,7 @@
 
 
 //Highlights the current page in the navbar
-let pageLinks = document.querySelectorAll("#sidebarMenu .nav-link"); //FIXME: not selecting all the right things.
+let pageLinks = document.querySelectorAll("#sidebarMenu .nav-link");
 
 pageLinks.forEach(link => {
     if (document.title.includes(link.id) && link.id != "")
