@@ -5,7 +5,7 @@
 let pageLinks = document.querySelectorAll("#sidebarMenu .nav-link"); //FIXME: not selecting all the right things.
 
 pageLinks.forEach(link => {
-    if (document.title.includes(link.id))
+    if (document.title.includes(link.id) && link.id != "")
         link.classList.add("active");
 });
 

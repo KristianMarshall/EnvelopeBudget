@@ -47,7 +47,7 @@ class CatTransTable extends htmlTable {
             let editableRows = [];
 
             document.querySelectorAll("tr").forEach(row => {
-                if(row.querySelector(".rowinput") !== null)
+                if(row.querySelector(".rowInput") !== null)
                     editableRows.push(row);
             });
 
@@ -111,7 +111,7 @@ class CatTransTable extends htmlTable {
             deleteButton.addEventListener("click", deleteEvent => {
                 deleteEvent.target.insertAdjacentHTML("afterend", `
                 <input id="cancel" type="button" value="Cancel" class="btn btn-sm btn-outline-secondary">
-                <input id="confirm" type="button" value="Confirm" class="btn btn-sm btn-outline-secondary">`);
+                <input id="confirm" type="button" value="Confirm" class="btn btn-sm btn-danger">`);
                 deleteEvent.target.hidden = true;
 
                 deleteEvent.path[3].classList.add('table-danger');
@@ -185,8 +185,8 @@ class CatTransTable extends htmlTable {
                 case 5:
                     inputElement = `
                     <div class="btn-group" role="group">
-                        <input type="button" value="Save" class="saveButton btn btn-sm btn-outline-secondary" disabled>
-                        <input type="button" value="Discard" class="btn btn-sm btn-outline-secondary">
+                        <input type="button" value="Save" class="saveButton btn btn-sm btn-outline-success" disabled>
+                        <input type="button" value="Discard" class="btn btn-sm btn-outline-danger">
                     </div>`;
                     break;
             }
@@ -204,7 +204,7 @@ class CatTransTable extends htmlTable {
         });
 
         //event listener for the discard button
-        cells[cells.length - 1].lastChild.children[2].addEventListener("click", event => {
+        cells[cells.length - 1].lastChild.children[1].addEventListener("click", event => {
             if (this._rows[rowElement.rowIndex][0] != '')
                 this._printRow(rowElement.rowIndex);
             else {
@@ -215,7 +215,7 @@ class CatTransTable extends htmlTable {
         })
 
         //event listener for the save button
-        cells[cells.length - 1].lastChild.children[1].addEventListener("click", event => {
+        cells[cells.length - 1].lastChild.children[0].addEventListener("click", event => {
             this.#saveButtonClick(rowElement);
         })
     }
@@ -233,19 +233,21 @@ class CatTransTable extends htmlTable {
         if(new Date(cells[0].lastChild.value + "T05:00:00.000Z") == "Invalid Date")
             valid = false;
 
-
+        //amount should be a number and above 0
         if(isNaN(cells[1].lastChild.value) || Number(cells[1].lastChild.value) <= 0) //TODO: Still need to verify input precision
             valid = false;
 
+        //not valid if to and from category haven't not been selected
         for (let dropdown = 1; dropdown < 3; dropdown++) 
             if(isNaN(cells[dropdown + 1].lastChild.value) || cells[dropdown + 1].lastChild.value == "")
                 valid = false;
 
+        //not valid if to and from category are the same
         if(cells[2].lastChild.value == cells[3].lastChild.value )
             valid = false;
         
         //enable the button if all the data is valid
-        cells[5].firstChild.disabled = !valid;
+        cells[5].lastChild.children[0].disabled = !valid;
 
         //enable the submit all button if all the save buttons are clickable
         let allSaveButtons = true;
@@ -303,8 +305,8 @@ class CatTransTable extends htmlTable {
         })
             .then(response => response.json())
             .then(result => {
-                console.log(result); //TODO: error check
-                if(this.#tableIds[rowID][0] === null)
+                console.log(result); //TODO: error check and highlight row green if successful
+                if(this.#tableIds[rowID][0] === null) 
                     this.#tableIds[rowID][0] = result.insertId;
             });
     }
