@@ -19,8 +19,10 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
     #transactionIDs = [];
     #notsurewhattocallit;
     #actionButtons = `
-        <input type="button" value="Edit" class="edit">
-        <input type="button" value="Delete" class="delete">
+        <div class="btn-group" role="group">
+            <input type="button" value="Edit" class="edit btn btn-sm btn-outline-secondary">
+            <input type="button" value="Delete" class="delete btn btn-sm btn-outline-secondary">
+        </div>
         `;
     constructor(tableElement, jsonData) {
         let tableData = [];
@@ -32,8 +34,10 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         tableData.map(row => row[0] = new Date(row[0])); //Sets all the date rows as a date object
 
         let actionButtons = `
-        <input type="button" value="Edit" class="edit">
-        <input type="button" value="Delete" class="delete">
+        <div class="btn-group" role="group">
+            <input type="button" value="Edit" class="edit btn btn-sm btn-outline-secondary">
+            <input type="button" value="Delete" class="delete btn btn-sm btn-outline-secondary">
+        </div>
         `;
         tableData.map(row => row.push(actionButtons));
 
@@ -119,24 +123,28 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         if (editButton != null) {
             editButton.addEventListener("click", event => {
                 document.querySelector("#submitAll").disabled = true;
-                let tableRowElement = event.path[2];
+                let tableRowElement = event.path[3];
                 this.#makeEditableRow(tableRowElement);
                 this.#addDataToEditableRow(tableRowElement);
             });
 
-            //TODO: need to center these buttons
             deleteButton.addEventListener("click", deleteEvent => {
-                deleteEvent.target.insertAdjacentHTML("afterend", `<input id="cancel" type="button" value="Cancel"><input id="confirm" type="button" value="Confirm">`);
+                deleteEvent.target.insertAdjacentHTML("afterend", `
+                <input id="cancel" type="button" value="Cancel" class="btn btn-sm btn-outline-secondary">
+                <input id="confirm" type="button" value="Confirm" class="btn btn-sm btn-outline-secondary">`);
                 deleteEvent.target.hidden = true;
+
+                deleteEvent.path[3].classList.add('table-danger');
 
                 deleteEvent.target.parentElement.querySelector("#cancel").addEventListener("click", event => {
                     deleteEvent.target.hidden = false
+                    deleteEvent.path[3].classList.remove('table-danger');
                     event.target.parentElement.querySelector("#confirm").remove();
                     event.target.remove();
                 });
 
                 deleteEvent.target.parentElement.querySelector("#confirm").addEventListener("click", event => {
-                    this.#deleteRow(rowID, event.target.parentElement.parentElement);
+                    this.#deleteRow(rowID, deleteEvent.path[3]);
                 });
                 
             });
@@ -227,7 +235,13 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
                     inputElement = `<input size=21 class="rowInput">`;
                     break;
                 case 6:
-                    inputElement = `<input type="button" class="saveButton" value="Save" disabled>\n<input type="button" value="Discard">`;
+                    inputElement = `
+                    <div class="btn-group" role="group">
+                        <input type="checkbox" class="btn-check" id="pending" autocomplete="off">
+                        <label class="btn btn-sm btn-outline-info" for="pending">Pending</label>
+                        <input type="button" value="Save" class="saveButton btn btn-sm btn-outline-success" disabled>
+                        <input type="button" value="Discard" class="btn btn-sm btn-outline-danger">
+                    </div>`;
                     break;
             }
 
@@ -253,7 +267,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         })
 
         //event listener for the discard button
-        cells[cells.length - 1].lastChild.addEventListener("click", event => {
+        cells[6].lastChild.children[3].addEventListener("click", event => {
             if (this._rows[rowElement.rowIndex][0] != '')
                 this._printRow(rowElement.rowIndex);
             else {
@@ -264,7 +278,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         })
 
         //event listener for the save button
-        cells[cells.length - 1].firstChild.addEventListener("click", event => {
+        cells[6].lastChild.children[2].addEventListener("click", event => {
             this.#saveButtonClick(rowElement);
         })
 
@@ -293,7 +307,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
                 valid = false;
 
         //enable the button if all the data is valid
-        cells[6].firstChild.disabled = !valid;
+        cells[6].lastChild.children[2].disabled = !valid;
 
         //enable the submit all button if all the save buttons are clickable
         let allSaveButtons = true;
@@ -336,7 +350,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
 
     #createDropdown(typeObj, name) {
         let dropdownHtml = `
-        <select class="rowInput">
+        <select class="rowInput form-select form-select-sm">
             <option value=""> -- Select a ${name} -- </option>`;
 
         typeObj.forEach(object => {

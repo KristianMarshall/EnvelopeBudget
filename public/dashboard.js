@@ -13,7 +13,7 @@ function updateTable() {
 
         tableHTML += "<tr>\n";
         for (let i = 1; i < headings.length; i++) {
-            tableHTML += `<th>${headings[i]}</th>\n`;
+            tableHTML += `<th scope="col">${headings[i]}</th>\n`;
         }
         tableHTML += "</tr>\n";
 
@@ -47,5 +47,10 @@ document.querySelector("#prevMonth").addEventListener("click", event => {
 });
 document.querySelector("#nextMonth").addEventListener("click", event => {
     monthDelta--;
+    updateTable();
+});
+
+document.querySelector("#thisMonth").addEventListener("click", event => {
+    monthDelta = 0;
     updateTable();
 });

@@ -11,8 +11,10 @@ class CatTransTable extends htmlTable {
     #tableIds = [];
     #categories;
     #actionButtons = `
-        <input type="button" value="Edit" class="edit">
-        <input type="button" value="Delete" class="delete">
+        <div class="btn-group" role="group">
+            <input type="button" value="Edit" class="edit btn btn-sm btn-outline-secondary">
+            <input type="button" value="Delete" class="delete btn btn-sm btn-outline-secondary">
+        </div>
         `;
     constructor(tableElement, jsonData) {
         let tableData = jsonData[0];
@@ -23,8 +25,10 @@ class CatTransTable extends htmlTable {
         tableData.map(row => row[0] = new Date(row[0])); //Sets all the date rows as a date object
         
         let actionButtons = `
-        <input type="button" value="Edit" class="edit">
-        <input type="button" value="Delete" class="delete">
+        <div class="btn-group" role="group">
+            <input type="button" value="Edit" class="edit btn btn-sm btn-outline-secondary">
+            <input type="button" value="Delete" class="delete btn btn-sm btn-outline-secondary">
+        </div>
         `;
         tableData.map(row => row.push(actionButtons));
 
@@ -99,24 +103,28 @@ class CatTransTable extends htmlTable {
         if (editButton != null) {
             editButton.addEventListener("click", event => {
                 document.querySelector("#submitAll").disabled = true;
-                let tableRowElement = event.path[2];
+                let tableRowElement = event.path[3];
                 this.#makeEditableRow(tableRowElement);
                 this.#addDataToEditableRow(tableRowElement);
             });
 
-            //TODO: need to center these buttons
             deleteButton.addEventListener("click", deleteEvent => {
-                deleteEvent.target.insertAdjacentHTML("afterend", `<input id="cancel" type="button" value="Cancel"><input id="confirm" type="button" value="Confirm">`);
+                deleteEvent.target.insertAdjacentHTML("afterend", `
+                <input id="cancel" type="button" value="Cancel" class="btn btn-sm btn-outline-secondary">
+                <input id="confirm" type="button" value="Confirm" class="btn btn-sm btn-outline-secondary">`);
                 deleteEvent.target.hidden = true;
+
+                deleteEvent.path[3].classList.add('table-danger');
 
                 deleteEvent.target.parentElement.querySelector("#cancel").addEventListener("click", event => {
                     deleteEvent.target.hidden = false
+                    deleteEvent.path[3].classList.remove('table-danger');
                     event.target.parentElement.querySelector("#confirm").remove();
                     event.target.remove();
                 });
 
                 deleteEvent.target.parentElement.querySelector("#confirm").addEventListener("click", event => {
-                    this.#deleteRow(rowID, event.target.parentElement.parentElement);
+                    this.#deleteRow(rowID, deleteEvent.path[3]); //TODO: switch to a event.path
                 });
                 
             });
@@ -175,7 +183,11 @@ class CatTransTable extends htmlTable {
                     inputElement = `<input size=21 class="rowInput">`;
                     break;
                 case 5:
-                    inputElement = `<input type="button" class="saveButton" value="Save" disabled>\n<input type="button" value="Discard">`;
+                    inputElement = `
+                    <div class="btn-group" role="group">
+                        <input type="button" value="Save" class="saveButton btn btn-sm btn-outline-secondary" disabled>
+                        <input type="button" value="Discard" class="btn btn-sm btn-outline-secondary">
+                    </div>`;
                     break;
             }
 
@@ -192,7 +204,7 @@ class CatTransTable extends htmlTable {
         });
 
         //event listener for the discard button
-        cells[cells.length - 1].lastChild.addEventListener("click", event => {
+        cells[cells.length - 1].lastChild.children[2].addEventListener("click", event => {
             if (this._rows[rowElement.rowIndex][0] != '')
                 this._printRow(rowElement.rowIndex);
             else {
@@ -203,7 +215,7 @@ class CatTransTable extends htmlTable {
         })
 
         //event listener for the save button
-        cells[cells.length - 1].firstChild.addEventListener("click", event => {
+        cells[cells.length - 1].lastChild.children[1].addEventListener("click", event => {
             this.#saveButtonClick(rowElement);
         })
     }
@@ -248,7 +260,7 @@ class CatTransTable extends htmlTable {
 
     #createDropdown(typeObj, name) {
         let dropdownHtml = `
-        <select class="rowInput">
+        <select class="rowInput form-select form-select-sm">
             <option value=""> -- Select a ${name} -- </option>`;
 
         typeObj.forEach(object => {

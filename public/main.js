@@ -1,17 +1,16 @@
-//Stuff to run on every page
-window.addEventListener("load", event => {
 
 
-    //Highlights the current page in the navbar
-    let pageLinks = document.querySelectorAll("#navbar a");
 
-    pageLinks.forEach(link => {
-        if (document.title.includes(link.id))
-            link.classList.add("selected");
-    });
+//Highlights the current page in the navbar
+let pageLinks = document.querySelectorAll("#sidebarMenu .nav-link"); //FIXME: not selecting all the right things.
+
+pageLinks.forEach(link => {
+    if (document.title.includes(link.id))
+        link.classList.add("active");
 });
 
-function drawAccountBalances(jsonData){
+
+function drawAccountBalances(jsonData) {
     let accounts = jsonData;
     let balanceHtml = "";
 
@@ -30,17 +29,17 @@ class htmlTable {
 
         this._addHeadings(tableData[0]);
         this._addRowData(tableData.slice(1));
-        if(printTable)
+        if (printTable)
             this._printTable();
     }
 
-    _printHeading(){ 
+    _printHeading() {
         let tableHeading = this._table.querySelector("thead");
         let headingHTML = "";
         headingHTML += "<tr>";
 
         this._rows[0].forEach(heading => {
-            headingHTML += `<th>${heading}</th>`; 
+            headingHTML += `<th>${heading}</th>`;
         });
 
         headingHTML += "</tr>";
@@ -48,7 +47,7 @@ class htmlTable {
         tableHeading.innerHTML = headingHTML;
     }
 
-    _printRow(rowID){
+    _printRow(rowID) {
         let tableBody = this._table.querySelector("tbody");
         let rowHTML = "";
         rowHTML += `<tr>`;
@@ -59,31 +58,31 @@ class htmlTable {
 
         rowHTML += "</tr>";
 
-        if(tableBody.lastChild == null)
+        if (tableBody.lastChild == null)
             tableBody.innerHTML += rowHTML; //calls to innerHTML overwrite the whole tbody including event listeners
         else
             tableBody.lastChild.insertAdjacentHTML("afterend", rowHTML);
     }
 
-    _printTable(){
+    _printTable() {
         this._table.innerHTML = "<thead></thead>\n<tbody></tbody>";
         this._printHeading();
 
-        for(let rowID = 1; rowID < this._rows.length; rowID++){
+        for (let rowID = 1; rowID < this._rows.length; rowID++) {
             this._printRow(rowID);
         }
     }
 
-    _addHeadings(tableStringHeadings){
+    _addHeadings(tableStringHeadings) {
         this._rows.push(tableStringHeadings);
     }
 
     //adds a row to the classes row data. if the inputted data is shorter it gets padded with null
-    _addRowData(rowData){
+    _addRowData(rowData) {
         rowData.forEach(row => {
             let newRow = [];
-            
-            for (let column = 0; column < this._rows[0].length; column++) 
+
+            for (let column = 0; column < this._rows[0].length; column++)
                 newRow.push(row[column] === undefined ? null : row[column]);
 
 
@@ -91,15 +90,15 @@ class htmlTable {
         });
     }
 
-    _addRow(rowData){
-        if(rowData === undefined){
+    _addRow(rowData) {
+        if (rowData === undefined) {
             rowData = [];
             for (let i = 0; i < this._rows[0].length; i++)
                 rowData.push(''); //TODO: should probably switch to null
         }
 
         this._rows.push(rowData);
-        this._printRow(this._rows.length-1);
+        this._printRow(this._rows.length - 1);
     }
 
 }

@@ -1,19 +1,39 @@
-<%- include('./partials/header', { title: "Dashboard - EB" }); %>
-    <div class="page">
-    <div id="leftbar">
-        <h3>Account Balances</h3>
-        <div id="AB"></div>
-    </div>
-    <div id="content">
-      <input type="button" id="prevMonth" value="Previous Month"><span id="curMonth">Current Month</span><input type="button" id="nextMonth" value="Next Month">
-        <table>
-            <tr> <!-- TODO: change to thead and tbody -->
-              <th>Loading...</th>
-            </tr>
-        </table>
-    </div>
-    </div>
+<%- include('./partials/header', { title: "Dashboard · EB" }); %>
 
-    <script type="text/javascript" src="/dashboard.js"></script>
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Dashboard</h1>
+        <span id="curMonth">Current Month</span>
+        <div class="btn-toolbar mb-2 mb-md-0">
+          <div class="btn-group me-2">
+            <button type="button" id="prevMonth" class="btn btn-sm btn-outline-secondary">Previous Month</button>
+            <button type="button" id="nextMonth" class="btn btn-sm btn-outline-secondary">Next Month</button>
+
+            <button type="button" id="thisMonth" class="btn btn btn-sm btn-outline-secondary">This Month <span data-feather="calendar" class="align-text-bottom"></span></button>
+            <button type="button" class="btn btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+              <span class="visually-hidden">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu"> <!-- TODO: Make this automatically generated and do something -->
+              <li><button class="dropdown-item" type="button">January</button></li>
+              <li><button class="dropdown-item" type="button">February</button></li>
+              <li><button class="dropdown-item" type="button">Not finished</button></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-striped table-hover table-sm">
+          <tr> <!-- TODO: change to thead and tbody -->
+            <th>Loading...</th>
+          </tr>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+    <script src="/dashboard.js"></script>
+    <script src="/main.js"></script>
+    
 <%- include('./partials/footer'); %>
 
