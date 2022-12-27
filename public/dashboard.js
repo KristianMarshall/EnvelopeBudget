@@ -2,6 +2,7 @@ let monthDelta = 0;
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 function updateTable() {
+    let colsToHide = 2;
     let dashboardJson = fetch(`/DashboardJson?month=${monthDelta}`).then(response => response.json());
     let accountBalanceJson = fetch("/AccountBalanceJson").then(response => response.json());
 
@@ -12,14 +13,28 @@ function updateTable() {
         let tableHTML = "";
 
         tableHTML += "<tr>\n";
-        for (let i = 1; i < headings.length; i++) {
+        for (let i = colsToHide; i < headings.length; i++) {
             tableHTML += `<th scope="col">${headings[i]}</th>\n`;
         }
         tableHTML += "</tr>\n";
 
+        let currentGroup = 1;
+
         for (let i = 0; i < data.length; i++) {
+            if(currentGroup != data[i]["catGroupID"]){
+                currentGroup = data[i]["catGroupID"];
+                tableHTML += `
+                <tr class="table-secondary">
+                    <th>${allData[0][2][currentGroup-1].catGroupName}</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                `;
+            }
+
             tableHTML += "<tr>\n";
-            for (let j = 1; j < headings.length; j++) {
+            for (let j = colsToHide; j < headings.length; j++) {
                 rowData = data[i][headings[j]];
 
                 if (rowData == null)

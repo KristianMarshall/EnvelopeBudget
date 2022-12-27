@@ -26,11 +26,11 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         `;
     constructor(tableElement, jsonData) {
         let tableData = [];
-
-        let headings = Object.keys(jsonData.transactions[0]).slice(4);
+        let colsToHide = 5;
+        let headings = Object.keys(jsonData.transactions[0]).slice(colsToHide);
         headings.push("Actions");
 
-        tableData = jsonData.transactions.map(t => Object.entries(t).map(d => d[1]).slice(4)); //Really ugly but it converts an array of objects into an array of arrays and cuts off te first 4 values
+        tableData = jsonData.transactions.map(t => Object.entries(t).map(d => d[1]).slice(colsToHide)); //Really ugly but it converts an array of objects into an array of arrays and cuts off te first 4 values
         tableData.map(row => row[0] = new Date(row[0])); //Sets all the date rows as a date object
 
         let actionButtons = `
@@ -45,8 +45,8 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
 
         super(tableElement, tableData, false);
 
-        let idHeadings = Object.keys(jsonData.transactions[0]).slice(0, 4);
-        this.#transactionIDs = jsonData.transactions.map(t => Object.entries(t).map(d => d[1]).slice(0, 4)); //Same thing as above but grabs the other part of the array
+        let idHeadings = Object.keys(jsonData.transactions[0]).slice(0, colsToHide);
+        this.#transactionIDs = jsonData.transactions.map(t => Object.entries(t).map(d => d[1]).slice(0, colsToHide)); //Same thing as above but grabs the other part of the array
         this.#transactionIDs.unshift(idHeadings);
 
         jsonData.vendors.unshift({
@@ -82,10 +82,17 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         });
     }
 
-    _printRow(rowID) {
+    _printRow(rowID, changedRow) {
         let tableBody = this._table.querySelector("tbody");
         let rowHTML = "";
-        rowHTML += `<tr>`;
+        let classes = "";
+
+        if(changedRow)
+            classes += 'table-success';
+        else if(this.#transactionIDs[rowID][4] && rowID != 0) //if transaction is pending colour the row blue
+            classes = 'table-info';
+
+        rowHTML += `<tr class="${classes}">`;
 
         this._rows[rowID == 0 ? 1 : rowID].forEach(data => {
 
@@ -182,8 +189,16 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             vendor,                                         //vendor
             this._rows[rowID][5]                            //memo
         ]
+
+        let cells = rowElement.querySelectorAll("td");
+
         for (let colIdx = 0; colIdx < dataToAdd.length; colIdx++)
-            rowElement.querySelectorAll("td")[colIdx].querySelector("*").value = dataToAdd[colIdx];
+            cells[colIdx].querySelector("*").value = dataToAdd[colIdx];
+
+        //highlight pending button if the row is pending
+        if(this.#transactionIDs[rowID][4])
+            cells[6].lastChild.children[0].classList.add("active");
+
     }
 
     #saveDataFromEditableRow(rowElement) {
@@ -213,6 +228,11 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
 
         let memo = cells[5].lastChild.value;
         this._rows[rowElement.rowIndex][5] = memo == "" ? null : memo;
+
+        if(cells[6].lastChild.children[0].classList.contains("active"))
+            this.#transactionIDs[rowElement.rowIndex][4] = 1;
+        else
+            this.#transactionIDs[rowElement.rowIndex][4] = 0;
     }
 
     #makeEditableRow(rowElement) {
@@ -237,7 +257,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
                 case 6:
                     inputElement = `
                     <div class="btn-group" role="group">
-                        <button type="button" id="pending" class="rowInput btn btn-sm btn-outline-info" data-bs-toggle="button">Pending</button>
+                        <button type="button" id="pending" class="btn btn-sm btn-outline-info" data-bs-toggle="button">Pending</button>
                         <input type="button" value="Save" class="saveButton btn btn-sm btn-outline-success" disabled>
                         <input type="button" value="Discard" class="btn btn-sm btn-outline-danger">
                     </div>`;
@@ -271,6 +291,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
                 rowElement.classList.add("table-info");
             else
                 rowElement.classList.remove("table-info");
+            this.#validateRow(rowElement)
         })
 
         //event listener for the save button
@@ -294,12 +315,11 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
     #saveButtonClick(rowElement){
         this.#saveDataFromEditableRow(rowElement); 
         this.#submitRow(rowElement.rowIndex); //FIXME: should only save if database update goes well
-        this._printRow(rowElement.rowIndex);
+        this._printRow(rowElement.rowIndex, true);
     }
 
     #validateRow(rowElement){ 
         let cells = rowElement.querySelectorAll("td");
-        let submitAllButton = document.querySelector("#submitAll");
         let valid = true;
 
         if(new Date(cells[0].lastChild.value + "T05:00:00.000Z") == "Invalid Date")

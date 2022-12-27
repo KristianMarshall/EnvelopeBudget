@@ -66,8 +66,9 @@ function updateOrAddTransaction(transaction, vendorAddResult) {
     transaction.rowData[1],        //Amount
     transaction.transactionIDs[1], //Id of Category
     transaction.transactionIDs[2], //Id of Account
-    vendorId,                   //Id of Vendor
+    vendorId,                      //Id of Vendor
     transaction.rowData[5],        //Memo
+    transaction.transactionIDs[4], //Pending
     transaction.transactionIDs[0]  // Transaction Id
   ];
 
@@ -76,11 +77,12 @@ function updateOrAddTransaction(transaction, vendorAddResult) {
   if (transaction.transactionIDs[0] !== null)
     query = `
     UPDATE transaction
-    SET transactionDate = ?, transactionAmt = ?, categoryID = ?, accountID = ?, vendorID = ?, transactionMemo = ?
+    SET transactionDate = ?, transactionAmt = ?, categoryID = ?, accountID = ?,
+         vendorID = ?, transactionMemo = ?, transactionPending = ?
     WHERE transactionID = ?`;
   else {
     query = `INSERT INTO transaction VALUES
-            (0, ?, ?, ?, ?, ?, ?, DEFAULT)`;
+            (0, ?, ?, ?, ?, ?, ?, ?)`;
     sqlData.pop();
   }
 

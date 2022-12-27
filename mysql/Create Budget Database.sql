@@ -65,7 +65,7 @@ CREATE TABLE transaction
 		FOREIGN KEY(vendorID)				
         REFERENCES vendor(vendorID),
 	transactionMemo			VARCHAR(150),
-    transactionNotCleared	BOOLEAN		NOT NULL	DEFAULT 0
+    transactionPending		BOOLEAN		NOT NULL	DEFAULT 0
 );
 
 CREATE TABLE categoryTransfer
@@ -131,7 +131,7 @@ INSERT INTO vendor VALUES
 (0, 'Walmart'),
 (0, 'Taco Bell');
 
--- transactionID, transactionDate, transactionAmt, categoryID, accountID, vendorID, transactionMemo, transactionNotCleared
+-- transactionID, transactionDate, transactionAmt, categoryID, accountID, vendorID, transactionMemo, transactionPending
 INSERT INTO transaction VALUES
 (0,	'2022-01-01', 2000, 	 1, 1, NULL, 	'Start Of Budget',	DEFAULT),
 (0,	'2022-01-01', 8000, 	 1, 2, NULL, 	'Start Of Budget',	DEFAULT),
@@ -143,7 +143,7 @@ INSERT INTO transaction VALUES
 (0,	'2022-02-02', 250, 		 2, 2, NULL, 	'Move to savings', 	DEFAULT),
 (0,	'2022-02-01', -15.72, 	 3, 1, 3, 		NULL,			 	DEFAULT),
 (0,	'2022-02-01', 1423.58, 	 1, 1, NULL, 	'Paycheque', 		DEFAULT),
-(0,	'2022-12-15', -18.37, 	 3, 1, 3, 		NULL,			 	DEFAULT),
+(0,	'2022-12-15', -18.37, 	 3, 1, 3, 		NULL,			 	1),
 (0,	'2022-12-17', -75.48, 	 5, 1, NULL, 	NULL,			 	DEFAULT);
 
 -- catTranID, catTranDate, catTranAmt, fromCategoryID, toCategoryID, catTranMemo
@@ -172,7 +172,7 @@ FROM BudgetTest.category c
 
 -- Transaction View
 CREATE VIEW Transactions AS
-SELECT transactionID, t.categoryID, t.accountID, t.vendorID, transactionDate as Date, transactionAmt as Amount, categoryName as Category, accountName as Account, vendorName as Vendor, transactionMemo as Memo
+SELECT transactionID, t.categoryID, t.accountID, t.vendorID, transactionPending, transactionDate as Date, transactionAmt as Amount, categoryName as Category, accountName as Account, vendorName as Vendor, transactionMemo as Memo
 FROM BudgetTest.transaction t
 	JOIN category c
     ON t.categoryID = c.categoryID
@@ -367,7 +367,7 @@ CREATE PROCEDURE getDashboardTable(dateMonth DATE)
 BEGIN
 SET @toDate = LAST_DAY(dateMonth), @fromDate = DATE_SUB(dateMonth, INTERVAL DAYOFMONTH(dateMonth)-1 DAY);
 SELECT dateMonth as Date, @fromDate as "Start Date", @toDate as "End Date";
-SELECT category.categoryID, category.categoryName as Envelope, cB.Balance, Activity, totalBudgeted as "Total Budgeted"
+SELECT category.categoryID, category.catGroupID, category.categoryName as Envelope, cB.Balance, Activity, totalBudgeted as "Total Budgeted"
 FROM category
 LEFT JOIN
 (SELECT  t.categoryID, SUM(transactionAmt) as Activity
@@ -429,7 +429,9 @@ FROM	(SELECT  c.categoryID, SUM(transactionAmt) as Activity
 		) as AlmostCategoryBalance
 GROUP BY categoryID) as cB
 ON category.categoryID = cB.categoryID
-WHERE NOT category.categoryID = 2;
+WHERE NOT category.categoryID = 2
+ORDER BY catGroupID, categoryID;
+SELECT * FROM catGroup;
 END$$
 
 DELIMITER ;
