@@ -34,6 +34,10 @@ app.get('/CategoryTransfers', (req, res) => {
   res.render('categoryTransfers');
 });
 
+app.get('/AccountReport', (req, res) => {
+  res.render('accountReport');
+});
+
 app.get('/categoryTransfersJson', (req, res) => {
 
   queries.getCatTransTableData().then(queriesData => {

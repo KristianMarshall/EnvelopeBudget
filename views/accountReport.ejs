@@ -1,0 +1,35 @@
+<%- include('./partials/header', { title: "Account Report · EB" }); %>
+
+<main class="col-md-9 ms-sm-auto col-lg-10">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Account Report</h1>
+        <span id="curMonth" class="h4">2022</span>
+        <div class="btn-toolbar mb-2 mb-md-0">
+          <div class="btn-group me-2">
+            <button type="button" id="prevMonth" class="btn btn-sm btn-outline-secondary">Previous Year</button>
+            <button type="button" id="nextMonth" class="btn btn-sm btn-outline-secondary">Next Year</button>
+
+            <button type="button" id="thisMonth" class="btn btn btn-sm btn-outline-secondary">This Year <span data-feather="calendar" class="align-text-bottom"></span></button>
+            <button type="button" class="btn btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+              <span class="visually-hidden">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu"> <!-- TODO: Make this automatically generated and do something -->
+              <li><button class="dropdown-item" type="button">2022</button></li>
+              <li><button class="dropdown-item" type="button">2021</button></li>
+              <li><button class="dropdown-item" type="button">Not finished</button></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
+</main>
+</div>
+</div>
+<script src="main.js"></script> 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"
+integrity="sha384-zNy6FEbO50N+Cg5wap8IKA4M/ZnLJgzc6w2NqACZaK0u0FXfOWRRJOnQtpZun8ha"
+crossorigin="anonymous"></script>
+<script type="text/javascript" src="/accountReport.js"></script>
+
+<%- include('./partials/footer'); %>
