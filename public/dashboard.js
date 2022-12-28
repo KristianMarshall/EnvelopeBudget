@@ -21,6 +21,7 @@ function updateTable() {
         let currentGroup = 1;
 
         for (let i = 0; i < data.length; i++) {
+            //If we are at a new group print a heading for it
             if(currentGroup != data[i]["catGroupID"]){
                 currentGroup = data[i]["catGroupID"];
                 tableHTML += `
@@ -36,13 +37,21 @@ function updateTable() {
             tableHTML += "<tr>\n";
             for (let j = colsToHide; j < headings.length; j++) {
                 rowData = data[i][headings[j]];
-
+                let classes = "";
                 if (rowData == null)
                     rowData = "$0.00";
-                else if (typeof rowData == "number")
-                    rowData = rowData.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
+                else if (typeof rowData == "number"){  
+                    if(j == colsToHide+1 && rowData != 0){
+                        classes = "fw-semibold ";
+                        if(rowData > 0)
+                            classes += "text-success";
+                        else
+                            classes += "text-danger";
+                    }
+                    rowData = rowData.toLocaleString(undefined, { style: 'currency', currency: 'USD' });   
+                }
 
-                tableHTML += `<td>${rowData}</td>\n`;
+                tableHTML += `<td class="${classes}">${rowData}</td>\n`;
             }
             tableHTML += "</tr>\n";
         }

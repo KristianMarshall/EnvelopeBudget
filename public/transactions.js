@@ -95,16 +95,21 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         rowHTML += `<tr class="${classes}">`;
 
         this._rows[rowID == 0 ? 1 : rowID].forEach(data => {
-
+            classes = "";
             //Formatting checks
             if (data == null)
                 data = "";
-            else if (typeof data == "number") //Switch all the number values to currency.
+            else if (typeof data == "number") {//Switch all the number values to currency. and add font colour if its inflow or outflow
+                classes = "fw-semibold ";
+                if(data > 0)
+                    classes += "text-success";
+                else
+                    classes += "text-danger";
                 data = data.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
-            else if (data.constructor === Date)
+            } else if (data.constructor === Date)
                 data = data.toDateString();
 
-            rowHTML += `<td>${data}</td>`;
+            rowHTML += `<td class="${classes}">${data}</td>`;
         });
 
         rowHTML += "</tr>";
