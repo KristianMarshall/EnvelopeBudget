@@ -84,6 +84,9 @@ CREATE TABLE categoryTransfer
 	catTranMemo			VARCHAR(100)
 );
 
+CREATE Table months(month int);
+insert into months values
+(1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12);
 
 
 --------- TEST DATA ------------
@@ -432,6 +435,30 @@ ON category.categoryID = cB.categoryID
 WHERE NOT category.categoryID = 2
 ORDER BY catGroupID, categoryID;
 SELECT * FROM catGroup;
+END$$
+
+-- Total Income Between Dates
+CREATE PROCEDURE getAccountReport(monthDate DATE, accountID INT) -- //TODO: still need to add account id in to where
+BEGIN
+SET @toDate = LAST_DAY(monthDate), @fromDate = DATE_SUB(monthDate, INTERVAL DAYOFMONTH(monthDate)-1 DAY)-INTERVAL 11 month;
+SELECT @toDate, @fromDate;
+SELECT months.month, Expenses, Income
+FROM months
+LEFT JOIN
+(SELECT SUM(transactionAmt) as Expenses, MONTH(transactionDate) as Month
+FROM transaction
+WHERE transactionAmt < 0 
+    AND NOT categoryID = 2
+    AND transactionDate BETWEEN @fromDate AND @toDate
+GROUP By Month) as e
+ON months.month = e.Month
+LEFT JOIN (SELECT SUM(transactionAmt) as Income, MONTH(transactionDate) as Month
+FROM transaction
+WHERE transactionAmt > 0 
+    AND NOT categoryID = 2
+    AND transactionDate BETWEEN @fromDate AND @toDate
+GROUP By Month) as i
+ON i.Month = months.month;
 END$$
 
 DELIMITER ;
