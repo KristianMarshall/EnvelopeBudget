@@ -43,9 +43,13 @@ function getAccountBalanceData() {
   return querySql(`SELECT * FROM AccountBalance;`);
 }
 
-function getDashboardTableData(previousMonth) { //0 is current month and each positive integer is another month in the past
+function getAccountReport() {
+  return querySql(`call getAccountReport(CURDATE());`);
+}
 
-  let dashboardQuery = `call BudgetTest.getDashboardTable(CURDATE() - interval ${previousMonth} month);`;
+function getDashboardTableData(previousMonthDelta) { //0 is current month and each positive integer is another month in the past
+
+  let dashboardQuery = `call BudgetTest.getDashboardTable(CURDATE() - interval ${previousMonthDelta} month);`;
 
   //let safeQuery = mysql.functions.format(query, sqlData);
 
@@ -143,5 +147,6 @@ module.exports = {
   updateOrAddTransaction,
   updateOrAddCatTrans,
   deleteTransaction,
-  deleteCatTransfer
+  deleteCatTransfer,
+  getAccountReport
 }

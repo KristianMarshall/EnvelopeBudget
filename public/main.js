@@ -1,5 +1,4 @@
-
-
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 //Highlights the current page in the navbar
 let pageLinks = document.querySelectorAll("#sidebarMenu .nav-link");

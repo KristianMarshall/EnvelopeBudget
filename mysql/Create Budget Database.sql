@@ -98,7 +98,8 @@ INSERT INTO catGroup VALUES
 (0, 'Spending Money'),
 (0, 'Bills'),
 (0, 'Car Bills'),
-(0, 'Long-Term Funds');
+(0, 'Long-Term Funds'),
+(0, 'Giving');
 
 -- timeOpID, timeOpName, timeOpLength
 INSERT INTO timeOptions VALUES
@@ -136,8 +137,8 @@ INSERT INTO vendor VALUES
 
 -- transactionID, transactionDate, transactionAmt, categoryID, accountID, vendorID, transactionMemo, transactionPending
 INSERT INTO transaction VALUES
-(0,	'2022-01-01', 2000, 	 1, 1, NULL, 	'Start Of Budget',	DEFAULT),
-(0,	'2022-01-01', 8000, 	 1, 2, NULL, 	'Start Of Budget',	DEFAULT),
+(0,	'2022-01-01', 2000, 	 1, 1, NULL, 	'Start of Budget',	DEFAULT),
+(0,	'2022-01-01', 8000, 	 1, 2, NULL, 	'Start of Budget',	DEFAULT),
 (0,	'2022-01-25', -50.00,	 3, 1, 1, 		'Date Night',		DEFAULT),
 (0,	'2022-01-27', -75.23, 	 8, 1, 2, 		'Few Things', 		DEFAULT),
 (0,	'2022-01-30', -45.27, 	 4, 1, NULL, 	'game', 			DEFAULT),
@@ -437,8 +438,8 @@ ORDER BY catGroupID, categoryID;
 SELECT * FROM catGroup;
 END$$
 
--- Total Income Between Dates
-CREATE PROCEDURE getAccountReport(monthDate DATE, accountID INT) -- //TODO: still need to add account id in to where
+-- Get 12 month Account Report Ending on the month passed
+CREATE PROCEDURE getAccountReport(monthDate DATE) 
 BEGIN
 SET @toDate = LAST_DAY(monthDate), @fromDate = DATE_SUB(monthDate, INTERVAL DAYOFMONTH(monthDate)-1 DAY)-INTERVAL 11 month;
 SELECT @toDate, @fromDate;
@@ -456,9 +457,12 @@ LEFT JOIN (SELECT SUM(transactionAmt) as Income, MONTH(transactionDate) as Month
 FROM transaction
 WHERE transactionAmt > 0 
     AND NOT categoryID = 2
+	AND NOT transactionMemo = "Start of Budget"
     AND transactionDate BETWEEN @fromDate AND @toDate
 GROUP By Month) as i
 ON i.Month = months.month;
 END$$
+
+-- //TODO: still need to add account Report that works by account id
 
 DELIMITER ;

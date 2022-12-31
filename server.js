@@ -38,6 +38,12 @@ app.get('/AccountReport', (req, res) => {
   res.render('accountReport');
 });
 
+app.get('/AccountReportJson', (req, res) => {
+  queries.getAccountReport().then(queriesData => {
+    res.json(queriesData);
+  });
+});
+
 app.get('/categoryTransfersJson', (req, res) => {
 
   queries.getCatTransTableData().then(queriesData => {
