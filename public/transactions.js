@@ -1,18 +1,49 @@
 //Initialized data object to be filled after the fetch has returned
 let transactionTable = "";
+let page = 0;
+let take = calcTableScreenRows();
 
-let transactionJson = fetch("./transactionsJson").then(response => response.json());
-let accountBalanceJson = fetch("/AccountBalanceJson").then(response => response.json());
+// window.addEventListener("resize", event =>{ //This erases current table edits
+//     take = calcTableScreenRows();
+//     updateTable(page, take);
+// });
 
-window.addEventListener("load", event => {
+function updateTable(page, take){
+    let transactionJson = fetch(`./transactionsJson?page=${page}&take=${take}`).then(response => response.json());
+    let accountBalanceJson = fetch("/AccountBalanceJson").then(response => response.json());
+
     //This fetch grabs all of the data for the page. then draws the table with the information.
     Promise.all([transactionJson, accountBalanceJson]).then(allData => {
         transactionTable = new TransactionTable(document.querySelector("table"), allData[0]);
 
         drawAccountBalances(allData[1]);
     });
+
+}
+
+updateTable(page, take); //Initialize table
+
+document.querySelector("#next").addEventListener("click", event =>{
+    page++;
+    updateTable(page, take);
+    document.querySelector("#prev").disabled = page < 1;
 });
 
+document.querySelector("#prev").addEventListener("click", event =>{
+    page--;
+    updateTable(page, take);
+    document.querySelector("#prev").disabled = page < 1;
+});
+
+//calculates how many rows in the table will fit on the screen
+function calcTableScreenRows(){
+    let topMargin = document.querySelector("tbody").getBoundingClientRect().top;
+    let bottomMargin = 80;
+    let rowHeight = 40;
+    
+    
+    return Math.floor((window.innerHeight - topMargin - bottomMargin) / rowHeight);
+}
 
 
 class TransactionTable extends htmlTable { //TODO: should make rows and cells their own classes
@@ -62,24 +93,36 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
 
         this._printTable();
 
-        document.querySelector("#submitAll").addEventListener("click" , event => {
-            let editableRows = [];
+        let submitAllButton = document.querySelector("#submitAll");
 
-            document.querySelectorAll("tr").forEach(row => {
-                if(row.querySelector(".rowInput") !== null)
-                    editableRows.push(row);
+        if(submitAllButton.getAttribute('clickListener') !== 'true'){ //Stops it from re-adding an event listener if the table is reset
+            submitAllButton.setAttribute('clickListener', 'true');
+
+            submitAllButton.addEventListener("click" , event => {
+                let editableRows = [];
+
+                document.querySelectorAll("tr").forEach(row => {
+                    if(row.querySelector(".rowInput") !== null)
+                        editableRows.push(row);
+                });
+
+                editableRows.forEach(row => {
+                    this.#saveButtonClick(row);
+                });
             });
+        }
 
-            editableRows.forEach(row => {
-                this.#saveButtonClick(row);
+        let addRowButton = document.querySelector("#addRow");
+
+        if(addRowButton.getAttribute('clickListener') !== 'true'){ //Stops it from re-adding an event listener if the table is reset
+            addRowButton.setAttribute('clickListener', 'true');
+
+            addRowButton.addEventListener("click", event => {
+                this._addRow();
+                this.#makeEditableRow([...document.querySelectorAll("tr")][1]);
+                document.querySelector("#submitAll").disabled = true;
             });
-        });
-
-        document.querySelector("#addRow").addEventListener("click", event => {
-            this._addRow();
-            this.#makeEditableRow([...document.querySelectorAll("tr")][1]);
-            document.querySelector("#submitAll").disabled = true;
-        });
+        }
     }
 
     _printRow(rowID, changedRow) {
@@ -105,7 +148,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
                     classes += "text-success";
                 else
                     classes += "text-danger";
-                data = data.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
+                data = data.toLocaleString("en-CA", { style: 'currency', currency: 'CAD' });
             } else if (data.constructor === Date)
                 data = data.toDateString();
 
@@ -135,7 +178,8 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         if (editButton != null) {
             editButton.addEventListener("click", event => {
                 document.querySelector("#submitAll").disabled = true;
-                let tableRowElement = event.path[3];
+                let tableRowElement = event.composedPath()[3];
+                tableRowElement.classList.remove("table-danger"); // removes red background if the delete button was pressed right before
                 this.#makeEditableRow(tableRowElement);
                 this.#addDataToEditableRow(tableRowElement);
             });
@@ -146,17 +190,17 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
                 <input id="confirm" type="button" value="Confirm" class="btn btn-sm btn-danger">`);
                 deleteEvent.target.hidden = true;
 
-                deleteEvent.path[3].classList.add('table-danger');
+                deleteEvent.composedPath()[3].classList.add('table-danger'); // add red background if the delete button was pressed
 
                 deleteEvent.target.parentElement.querySelector("#cancel").addEventListener("click", event => {
                     deleteEvent.target.hidden = false
-                    deleteEvent.path[3].classList.remove('table-danger');
+                    event.composedPath()[3].classList.remove('table-danger');
                     event.target.parentElement.querySelector("#confirm").remove();
                     event.target.remove();
                 });
 
                 deleteEvent.target.parentElement.querySelector("#confirm").addEventListener("click", event => {
-                    this.#deleteRow(rowID, deleteEvent.path[3]);
+                    this.#deleteRow(rowID, event.composedPath()[3]);
                 });
                 
             });

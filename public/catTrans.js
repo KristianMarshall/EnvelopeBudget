@@ -74,7 +74,7 @@ class CatTransTable extends htmlTable {
             if (data == null)
                 data = "";
             else if (typeof data == "number") //Switch all the number values to currency.
-                data = data.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
+                data = data.toLocaleString("en-CA", { style: 'currency', currency: 'CAD' });
             else if (data.constructor === Date)
                 data = data.toDateString();
 

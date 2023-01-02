@@ -47,7 +47,7 @@ function updateTable() {
                         else
                             classes += "text-danger";
                     }
-                    rowData = rowData.toLocaleString(undefined, { style: 'currency', currency: 'USD' });   
+                    rowData = rowData.toLocaleString("en-CA", { style: 'currency', currency: 'CAD' });   
                 }
 
                 tableHTML += `<td class="${classes}">${rowData}</td>\n`;

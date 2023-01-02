@@ -19,7 +19,7 @@ app.get('/Transactions', (req, res) => {
 
 app.get('/TransactionsJson', (req, res) => {
 
-  queries.getTransactionTableData()
+  queries.getTransactionTableData(Number(req.query.page), Number(req.query.take))
   .then(queriesData =>{
     res.json({
       transactions: queriesData[0],

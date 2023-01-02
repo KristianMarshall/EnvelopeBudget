@@ -14,7 +14,7 @@ function drawAccountBalances(jsonData) {
     let balanceHtml = "";
 
     accounts.forEach(account => {
-        balanceHtml += `<p>${account.accountName}: $${account.balance}</p>\n`;
+        balanceHtml += `<p>${account.accountName}: <span class="text-success fw-semibold">$${account.balance}</span></p>\n`; //TODO: need to right aline numbers
     });
 
     document.querySelector("#AB").innerHTML = balanceHtml;
