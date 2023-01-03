@@ -25,6 +25,14 @@ document.querySelector("#prev").addEventListener("click", event =>{
     document.querySelector("#prev").disabled = page < 1;
 });
 
+document.querySelector("#submitAll").addEventListener("click", event =>{
+    catTransTable.submitAllClick();
+});
+
+document.querySelector("#addRow").addEventListener("click", event =>{
+    catTransTable.addRowClick();
+});
+
 class CatTransTable extends htmlTable {
     #tableIds = [];
     #categories;
@@ -61,23 +69,24 @@ class CatTransTable extends htmlTable {
         this.#tableIds =  jsonData[0].map(t => Object.entries(t).map(d => d[1]).slice(0, 3)); //Same thing as above but grabs the other part of the array
         this.#tableIds.unshift(idHeadings);
 
-        document.querySelector("#submitAll").addEventListener("click" , event => {
-            let editableRows = [];
+    }
 
-            document.querySelectorAll("tr").forEach(row => {
-                if(row.querySelector(".rowInput") !== null)
-                    editableRows.push(row);
-            });
+    addRowClick(){
+        this._addRow();
+        this.#makeEditableRow(this._table.rows[1]);
+        document.querySelector("#submitAll").disabled = true;
+    }
 
-            editableRows.forEach(row => {
-                this.#saveButtonClick(row);
-            });
+    submitAllClick(){
+        let editableRows = [];
+
+        this._table.querySelectorAll("tr").forEach(row => {
+            if (row.querySelector(".rowInput") !== null)
+                editableRows.push(row);
         });
 
-        document.querySelector("#addRow").addEventListener("click", event => {
-            this._addRow();
-            this.#makeEditableRow([...document.querySelectorAll("tr")][1]);
-            document.querySelector("#submitAll").disabled = true;
+        editableRows.forEach(row => {
+            this.#saveButtonClick(row);
         });
     }
 
@@ -228,7 +237,12 @@ class CatTransTable extends htmlTable {
             else {
                 this._rows.splice(rowElement.rowIndex, 1);
                 this.#tableIds.splice(rowElement.rowIndex, 1);
+                
+                let rowToReAdd = this._table.rows.length-1;
+                
                 rowElement.remove();
+                
+                this._printRow(rowToReAdd); //reprints the row that fell off the bottom of the table when the new row was added then removed
             }
         })
 
@@ -345,5 +359,8 @@ class CatTransTable extends htmlTable {
             tableIds.push(null);
 
             this.#tableIds.splice(1, 0, tableIds);
+
+        if(this._table.rows.length-1 > take)
+            this._table.querySelector("tbody").lastChild.remove(); //removes the last row to keep the table height the same
     }
 }

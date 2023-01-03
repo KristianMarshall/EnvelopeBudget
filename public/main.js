@@ -20,7 +20,7 @@ function calcTableScreenRows(){
 
 function drawAccountBalances(jsonData) {
     let accounts = jsonData;
-    let balanceHtml = '<table id="transactionsTable" class="table table-hover table-sm"> <tbody>';
+    let balanceHtml = '<table class="table table-hover table-sm"> <tbody>';
 
     accounts.forEach(account => {
         balanceHtml += `

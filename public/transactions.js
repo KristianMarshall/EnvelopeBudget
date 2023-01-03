@@ -35,6 +35,14 @@ document.querySelector("#prev").addEventListener("click", event =>{
     document.querySelector("#prev").disabled = page < 1;
 });
 
+document.querySelector("#submitAll").addEventListener("click", event =>{
+    transactionTable.submitAllClick();
+});
+
+document.querySelector("#addRow").addEventListener("click", event =>{
+    transactionTable.addRowClick();
+});
+
 
 class TransactionTable extends htmlTable { //TODO: should make rows and cells their own classes
     #transactionIDs = [];
@@ -82,37 +90,25 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
         }
 
         this._printTable();
+    }
 
-        let submitAllButton = document.querySelector("#submitAll");
+    addRowClick(){
+        this._addRow();
+        this.#makeEditableRow(this._table.rows[1]);
+        document.querySelector("#submitAll").disabled = true;
+    }
 
-        if(submitAllButton.getAttribute('clickListener') !== 'true'){ //Stops it from re-adding an event listener if the table is reset
-            submitAllButton.setAttribute('clickListener', 'true');
+    submitAllClick(){
+        let editableRows = [];
 
-            submitAllButton.addEventListener("click" , event => {
-                let editableRows = [];
+        this._table.querySelectorAll("tr").forEach(row => {
+            if (row.querySelector(".rowInput") !== null)
+                editableRows.push(row);
+        });
 
-                this._table.querySelectorAll("tr").forEach(row => {
-                    if(row.querySelector(".rowInput") !== null)
-                        editableRows.push(row);
-                });
-
-                editableRows.forEach(row => {
-                    this.#saveButtonClick(row);
-                });
-            });
-        }
-
-        let addRowButton = document.querySelector("#addRow");
-
-        if(addRowButton.getAttribute('clickListener') !== 'true'){ //Stops it from re-adding an event listener if the table is reset
-            addRowButton.setAttribute('clickListener', 'true');
-
-            addRowButton.addEventListener("click", event => {
-                this._addRow();
-                this.#makeEditableRow([...this._table.querySelectorAll("tr")][1]);
-                document.querySelector("#submitAll").disabled = true;
-            });
-        }
+        editableRows.forEach(row => {
+            this.#saveButtonClick(row);
+        });
     }
 
     _printRow(rowID, changedRow) {
@@ -449,8 +445,8 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             transactionIDs.push(null);
 
         this.#transactionIDs.splice(1, 0, transactionIDs);
-
-        this._table.querySelector("tbody").lastChild.remove(); //removes the last row to keep the table height the same
+        if(this._table.rows.length-1 > take)
+            this._table.querySelector("tbody").lastChild.remove(); //removes the last row to keep the table height the same
     }
 }
 
