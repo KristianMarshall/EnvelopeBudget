@@ -54,9 +54,13 @@ function updateTable() {
             }
             tableHTML += "</tr>\n";
         }
-        document.querySelector("table").innerHTML = tableHTML;
+        document.querySelector("#dashboard").innerHTML = tableHTML;
         let selectedDate = new Date(allData[0][0][0]["End Date"]); //this comes in with weird timezone stuff so it actually thinks its the day before
-        document.querySelector("#curMonth").innerHTML = `   ${months[selectedDate.getMonth()]}, ${selectedDate.getFullYear()}   `;
+        
+        let currMonthText = document.querySelector("#curMonth");
+        currMonthText.innerHTML = `   ${months[selectedDate.getMonth()]}, ${selectedDate.getFullYear()}   `;
+        currMonthText.classList.remove("placeholder");
+        currMonthText.classList.remove("col-2");
 
         drawAccountBalances(allData[1]);
     });

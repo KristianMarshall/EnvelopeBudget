@@ -14,7 +14,7 @@ function updateTable(page, take){
 
     //This fetch grabs all of the data for the page. then draws the table with the information.
     Promise.all([transactionJson, accountBalanceJson]).then(allData => {
-        transactionTable = new TransactionTable(document.querySelector("table"), allData[0]);
+        transactionTable = new TransactionTable(document.querySelector("#transactionsTable"), allData[0]);
 
         drawAccountBalances(allData[1]);
     });
@@ -34,16 +34,6 @@ document.querySelector("#prev").addEventListener("click", event =>{
     updateTable(page, take);
     document.querySelector("#prev").disabled = page < 1;
 });
-
-//calculates how many rows in the table will fit on the screen
-function calcTableScreenRows(){
-    let topMargin = document.querySelector("tbody").getBoundingClientRect().top;
-    let bottomMargin = 80;
-    let rowHeight = 40;
-    
-    
-    return Math.floor((window.innerHeight - topMargin - bottomMargin) / rowHeight);
-}
 
 
 class TransactionTable extends htmlTable { //TODO: should make rows and cells their own classes
@@ -101,7 +91,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             submitAllButton.addEventListener("click" , event => {
                 let editableRows = [];
 
-                document.querySelectorAll("tr").forEach(row => {
+                this._table.querySelectorAll("tr").forEach(row => {
                     if(row.querySelector(".rowInput") !== null)
                         editableRows.push(row);
                 });
@@ -119,7 +109,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
 
             addRowButton.addEventListener("click", event => {
                 this._addRow();
-                this.#makeEditableRow([...document.querySelectorAll("tr")][1]);
+                this.#makeEditableRow([...this._table.querySelectorAll("tr")][1]);
                 document.querySelector("#submitAll").disabled = true;
             });
         }
@@ -172,8 +162,8 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             }
         }
 
-        let editButton = document.querySelectorAll("tr")[rowID].querySelector(".edit");
-        let deleteButton = document.querySelectorAll("tr")[rowID].querySelector(".delete");
+        let editButton = this._table.querySelectorAll("tr")[rowID].querySelector(".edit");
+        let deleteButton = this._table.querySelectorAll("tr")[rowID].querySelector(".delete");
         //if a new row is added it will be blank and imminently switched to an editable row so the buttons aren't needed
         if (editButton != null) {
             editButton.addEventListener("click", event => {

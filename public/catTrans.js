@@ -1,10 +1,28 @@
-let catTransTable = ""; //TODO: add buttons to edit or add a transfer
+let catTransTable = "";
+let page = 0;
+let take = calcTableScreenRows();
 
-fetch("./categoryTransfersJson")
-.then(response => response.json())
-.then(data => {
-    let table = document.querySelector("table");
-    catTransTable = new CatTransTable(table, data);
+function updateTable(page, take){
+    fetch(`./categoryTransfersJson?page=${page}&take=${take}`)
+    .then(response => response.json())
+    .then(data => {
+        let table = document.querySelector("table");
+        catTransTable = new CatTransTable(table, data);
+    });
+}
+
+updateTable(page, take); //Initialize table
+
+document.querySelector("#next").addEventListener("click", event =>{
+    page++;
+    updateTable(page, take);
+    document.querySelector("#prev").disabled = page < 1;
+});
+
+document.querySelector("#prev").addEventListener("click", event =>{
+    page--;
+    updateTable(page, take);
+    document.querySelector("#prev").disabled = page < 1;
 });
 
 class CatTransTable extends htmlTable {
@@ -103,7 +121,7 @@ class CatTransTable extends htmlTable {
         if (editButton != null) {
             editButton.addEventListener("click", event => {
                 document.querySelector("#submitAll").disabled = true;
-                let tableRowElement = event.path[3];
+                let tableRowElement = event.composedPath()[3];
                 this.#makeEditableRow(tableRowElement);
                 this.#addDataToEditableRow(tableRowElement);
             });
@@ -114,17 +132,17 @@ class CatTransTable extends htmlTable {
                 <input id="confirm" type="button" value="Confirm" class="btn btn-sm btn-danger">`);
                 deleteEvent.target.hidden = true;
 
-                deleteEvent.path[3].classList.add('table-danger');
+                deleteEvent.composedPath()[3].classList.add('table-danger');
 
                 deleteEvent.target.parentElement.querySelector("#cancel").addEventListener("click", event => {
                     deleteEvent.target.hidden = false
-                    deleteEvent.path[3].classList.remove('table-danger');
+                    event.composedPath()[3].classList.remove('table-danger');
                     event.target.parentElement.querySelector("#confirm").remove();
                     event.target.remove();
                 });
 
                 deleteEvent.target.parentElement.querySelector("#confirm").addEventListener("click", event => {
-                    this.#deleteRow(rowID, deleteEvent.path[3]); //TODO: switch to a event.path
+                    this.#deleteRow(rowID, event.composedPath()[3]);
                 });
                 
             });

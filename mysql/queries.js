@@ -34,11 +34,14 @@ function getTransactionTableData(page, take) {
   return querySql(safeQuery);
 }
 
-function getCatTransTableData() {
-  return querySql(`
-      SELECT * FROM CategoryTransfers; 
-      SELECT categoryID as id, categoryName as name FROM category;`
-  );
+function getCatTransTableData(page, take) {
+
+  let safeQuery = mysql.functions.format(`
+  SELECT * FROM CategoryTransfers LIMIT ?, ?; 
+  SELECT categoryID as id, categoryName as name FROM category;`,
+  [page*take, take]);
+
+  return querySql(safeQuery);
 }
 
 function getAccountBalanceData() {

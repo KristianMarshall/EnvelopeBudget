@@ -46,7 +46,8 @@ app.get('/AccountReportJson', (req, res) => {
 
 app.get('/categoryTransfersJson', (req, res) => {
 
-  queries.getCatTransTableData().then(queriesData => {
+  queries.getCatTransTableData(Number(req.query.page), Number(req.query.take))
+  .then(queriesData => {
     res.json(queriesData);
   });
 });

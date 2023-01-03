@@ -8,14 +8,29 @@ pageLinks.forEach(link => {
         link.classList.add("active");
 });
 
+//calculates how many rows in the table will fit on the screen
+function calcTableScreenRows(){
+    let topMargin = document.querySelector("tbody").getBoundingClientRect().top;
+    let bottomMargin = 80;
+    let rowHeight = 40;
+    
+    
+    return Math.floor((window.innerHeight - topMargin - bottomMargin) / rowHeight);
+}
 
 function drawAccountBalances(jsonData) {
     let accounts = jsonData;
-    let balanceHtml = "";
+    let balanceHtml = '<table id="transactionsTable" class="table table-hover table-sm"> <tbody>';
 
     accounts.forEach(account => {
-        balanceHtml += `<p>${account.accountName}: <span class="text-success fw-semibold">$${account.balance}</span></p>\n`; //TODO: need to right aline numbers
+        balanceHtml += `
+        <tr>
+            <td>${account.accountName}:</td>
+            <td class="${account.balance > 0 ? "text-success" : account.balance == 0 ? "text-secondary" : "text-danger"} fw-semibold">${account.balance.toLocaleString("en-CA", { style: 'currency', currency: 'CAD' })}</td>
+        </tr>\n`;
     });
+
+    balanceHtml += '</tbody></table>';
 
     document.querySelector("#AB").innerHTML = balanceHtml;
 }
