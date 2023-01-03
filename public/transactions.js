@@ -345,7 +345,12 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             else {
                 this._rows.splice(rowElement.rowIndex, 1);
                 this.#transactionIDs.splice(rowElement.rowIndex, 1);
+
+                let rowToReAdd = this._table.rows.length-1;
+                
                 rowElement.remove();
+                
+                this._printRow(rowToReAdd); //reprints the row that fell off the bottom of the table when the new row was added then removed
             }
         })
 
@@ -444,6 +449,8 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             transactionIDs.push(null);
 
         this.#transactionIDs.splice(1, 0, transactionIDs);
+
+        this._table.querySelector("tbody").lastChild.remove(); //removes the last row to keep the table height the same
     }
 }
 

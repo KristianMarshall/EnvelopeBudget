@@ -11,7 +11,7 @@ function updateTable() {
         let headings = Object.keys(data[0]);
         let tableHTML = "";
 
-        tableHTML += "<tr>\n";
+        tableHTML += '<tr class="h6 table-secondary">\n';
         for (let i = colsToHide; i < headings.length; i++) {
             tableHTML += `<th scope="col">${headings[i]}</th>\n`;
         }
@@ -33,7 +33,7 @@ function updateTable() {
                 `;
             }
 
-            tableHTML += "<tr>\n";
+            tableHTML += `<tr class="${i == 0 ? "fs-6" : ""}">\n`;
             for (let j = colsToHide; j < headings.length; j++) {
                 rowData = data[i][headings[j]];
                 let classes = "";

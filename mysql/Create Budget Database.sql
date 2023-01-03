@@ -42,7 +42,7 @@ CREATE TABLE account
 CREATE TABLE vendor
 (
 	vendorID			MEDIUMINT 	NOT NULL 	AUTO_INCREMENT		PRIMARY KEY,
-	vendorName			VARCHAR(20)	NOT NULL
+	vendorName			VARCHAR(30)	NOT NULL
 );
 
 -- //TODO: Add users
@@ -84,6 +84,7 @@ CREATE TABLE categoryTransfer
 	catTranMemo			VARCHAR(100)
 );
 
+-- Couldn't figure out how to make this table dynamically 
 CREATE Table months(month int);
 insert into months values
 (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12);
