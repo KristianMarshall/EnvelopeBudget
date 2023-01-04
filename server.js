@@ -17,6 +17,10 @@ app.get('/Transactions', (req, res) => {
   res.render('transactions');
 });
 
+app.get('/Settings', (req, res) => {
+  res.render('settings');
+});
+
 app.get('/TransactionsJson', (req, res) => {
 
   queries.getTransactionTableData(Number(req.query.page), Number(req.query.take))

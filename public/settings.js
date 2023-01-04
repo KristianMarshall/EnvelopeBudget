@@ -1,0 +1,1 @@
+document.querySelector("a.nav-link.px-3").classList.add("active");
