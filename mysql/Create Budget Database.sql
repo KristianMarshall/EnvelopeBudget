@@ -90,7 +90,7 @@ insert into months values
 (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12);
 
 
---------- TEST DATA ------------
+--------- TEST DATA ------------ //TODO: add one sample row to all sections when the test data is deleted
 
 -- catGroupID, catGroupName
 INSERT INTO catGroup VALUES 
@@ -169,7 +169,7 @@ INSERT INTO categoryTransfer VALUES
 -- Category View
 CREATE VIEW Categories AS
 SELECT categoryID, categoryName, categoryHidden, categoryBudget, timeOpName, categoryDate, catGroupName 
-FROM BudgetTest.category c
+FROM category c
 	LEFT JOIN timeOptions timeO
     ON c.timeOpID = timeO.timeOpID
     LEFT JOIN catGroup cT
@@ -178,7 +178,7 @@ FROM BudgetTest.category c
 -- Transaction View
 CREATE VIEW Transactions AS
 SELECT transactionID, t.categoryID, t.accountID, t.vendorID, transactionPending, transactionDate as Date, transactionAmt as Amount, categoryName as Category, accountName as Account, vendorName as Vendor, transactionMemo as Memo
-FROM BudgetTest.transaction t
+FROM transaction t
 	JOIN category c
     ON t.categoryID = c.categoryID
     JOIN account a
@@ -190,7 +190,7 @@ ORDER BY transactionDate DESC, transactionID DESC;
 -- Account Balance View
 CREATE VIEW AccountBalance AS
 SELECT  SUM(transactionAmt) as balance, accountName
-FROM BudgetTest.transaction t
+FROM transaction t
 	JOIN category c
     ON t.categoryID = c.categoryID
     JOIN account a
@@ -202,7 +202,7 @@ GROUP BY accountName;
 -- Category Transaction View
 CREATE VIEW CategoryTransfers AS
 SELECT catTranID, fromCategoryID, toCategoryID, catTranDate as "Date", catTranAmt as "Amount", fC.categoryName as "From Category",  tC.categoryName as "To Category", catTranMemo as "Memo"
-FROM BudgetTest.categoryTransfer cT
+FROM categoryTransfer cT
 	join category tC
     on cT.toCategoryID = tC.categoryID
     join category fC
@@ -212,7 +212,7 @@ ORDER BY catTranDate DESC, catTranID DESC;
 -- Category Activity View
 CREATE VIEW CategoryActivity AS
 SELECT  t.categoryID, SUM(transactionAmt) as Activity, categoryName as Category
-FROM BudgetTest.transaction t
+FROM transaction t
 	join category c
     on t.categoryID = c.categoryID
     join account a
@@ -226,13 +226,13 @@ GROUP BY Category, t.categoryID;
 CREATE VIEW CategoryTotalBudgeted AS
 SELECT categoryID, SUM(Activity) AS Activity, Category
 FROM (	SELECT categoryID, SUM(catTranAmt) as Activity, tC.categoryName as Category
-		FROM BudgetTest.categoryTransfer cT
+		FROM categoryTransfer cT
 			join category tC
 			on cT.toCategoryID = tC.categoryID
 		GROUP BY Category, categoryID
 			UNION
 		SELECT categoryID, SUM(catTranAmt)*-1 as Activity, fC.categoryName as Category
-		FROM BudgetTest.categoryTransfer cT
+		FROM categoryTransfer cT
 			join category fC
 			on cT.fromCategoryID = fC.categoryID
 		GROUP BY Category, categoryID
@@ -252,10 +252,10 @@ GROUP BY categoryID;
 -- Dashboard VIEW
 CREATE VIEW Dashboard AS
 SELECT tB.categoryID, tB.category as Category, Balance, cA.Activity, tB.Activity as "Total Budgeted"
-FROM BudgetTest.CategoryTotalBudgeted tB
-	LEFT JOIN BudgetTest.CategoryActivity cA
+FROM CategoryTotalBudgeted tB
+	LEFT JOIN CategoryActivity cA
     ON cA.categoryID = tB.categoryID
-    JOIN BudgetTest.CategoryBalance cB
+    JOIN CategoryBalance cB
     ON tB.categoryID = cB.categoryID;
 
 -- Stored Procedures
@@ -266,7 +266,7 @@ DELIMITER $$
 CREATE PROCEDURE AccountBalanceOnDate(date DATE)
 BEGIN
 SELECT  SUM(transactionAmt), accountName
-FROM BudgetTest.transaction t
+FROM transaction t
 	JOIN category c
     ON t.categoryID = c.categoryID
     JOIN account a
@@ -282,7 +282,7 @@ CREATE PROCEDURE CategoryBalanceOnDate(date DATE)
 BEGIN
 SELECT SUM(Activity) as Balance, Category
 FROM	(SELECT  SUM(transactionAmt) as Activity, categoryName as Category
-		 FROM BudgetTest.transaction t
+		 FROM transaction t
 			join category c
 			on t.categoryID = c.categoryID
 			join account a
@@ -294,14 +294,14 @@ FROM	(SELECT  SUM(transactionAmt) as Activity, categoryName as Category
 		 GROUP BY Category
 				UNION
 		SELECT SUM(catTranAmt) as Activity, tC.categoryName as Category
-		FROM BudgetTest.categoryTransfer cT
+		FROM categoryTransfer cT
 			join category tC
 			on cT.toCategoryID = tC.categoryID
 		WHERE catTranDate <= date
 		GROUP BY Category
 				UNION
 		SELECT SUM(catTranAmt)*-1 as Activity, fC.categoryName as Category
-		FROM BudgetTest.categoryTransfer cT
+		FROM categoryTransfer cT
 			join category fC
 			on cT.fromCategoryID = fC.categoryID
 		WHERE catTranDate <= date
@@ -314,7 +314,7 @@ END$$
 CREATE PROCEDURE SpentBetweenDates(fromDate DATE, toDate DATE)
 BEGIN
 SELECT SUM(transactionAmt) as Spent
-FROM BudgetTest.transaction
+FROM transaction
 WHERE transactionAmt < 0 
 	AND (transactionDate BETWEEN fromDate AND toDate)
     AND NOT categoryID = 2;
@@ -324,7 +324,7 @@ END$$
 CREATE PROCEDURE IncomeBetweenDates(fromDate DATE, toDate DATE)
 BEGIN
 SELECT SUM(transactionAmt) as Income
-FROM BudgetTest.transaction
+FROM transaction
 WHERE transactionAmt > 0 
 	AND (transactionDate BETWEEN fromDate AND toDate)
     AND NOT categoryID = 2;
@@ -334,7 +334,7 @@ END$$
 CREATE PROCEDURE CategoryActivityBetweenDates(fromDate DATE, toDate DATE)
 BEGIN
 SELECT  t.categoryID, SUM(transactionAmt) as Activity
-FROM BudgetTest.transaction t
+FROM transaction t
 	join category c
     on t.categoryID = c.categoryID
     join account a
@@ -351,14 +351,14 @@ CREATE PROCEDURE CategoryTotalBudgetedBetweenDates(fromDate DATE, toDate DATE)
 BEGIN
 SELECT categoryID, SUM(Activity) AS "Total Budgeted", Category
 FROM (	SELECT categoryID, SUM(catTranAmt) as Activity, tC.categoryName as Category
-		FROM BudgetTest.categoryTransfer cT
+		FROM categoryTransfer cT
 			join category tC
 			on cT.toCategoryID = tC.categoryID
 		WHERE catTranDate BETWEEN fromDate AND toDate
 		GROUP BY Category, categoryID
 			UNION
 		SELECT categoryID, SUM(catTranAmt)*-1 as Activity, fC.categoryName as Category
-		FROM BudgetTest.categoryTransfer cT
+		FROM categoryTransfer cT
 			join category fC
 			on cT.fromCategoryID = fC.categoryID
 		WHERE catTranDate BETWEEN fromDate AND toDate
@@ -376,7 +376,7 @@ SELECT category.categoryID, category.catGroupID, category.categoryName as Envelo
 FROM category
 LEFT JOIN
 (SELECT  t.categoryID, SUM(transactionAmt) as Activity
-FROM BudgetTest.transaction t
+FROM transaction t
 join category c
 	on t.categoryID = c.categoryID
 	join account a
@@ -390,14 +390,14 @@ ON category.categoryID = activityTable.categoryID
 LEFT JOIN
 (SELECT categoryID, SUM(Activity) AS totalBudgeted
 FROM (	SELECT categoryID, SUM(catTranAmt) as Activity
-	FROM BudgetTest.categoryTransfer cT
+	FROM categoryTransfer cT
 		join category tC
 		on cT.toCategoryID = tC.categoryID
 	WHERE catTranDate BETWEEN @fromDate AND @toDate
 	GROUP BY categoryID
 		UNION
 	SELECT categoryID, SUM(catTranAmt)*-1 as Activity
-	FROM BudgetTest.categoryTransfer cT
+	FROM categoryTransfer cT
 		join category fC
 		on cT.fromCategoryID = fC.categoryID
 	WHERE catTranDate BETWEEN @fromDate AND @toDate
@@ -407,7 +407,7 @@ ON category.categoryID = totalBudgetedTable.categoryID
 LEFT JOIN 
 (SELECT categoryID, SUM(Activity) as Balance
 FROM	(SELECT  c.categoryID, SUM(transactionAmt) as Activity
-		 FROM BudgetTest.transaction t
+		 FROM transaction t
 			join category c
 			on t.categoryID = c.categoryID
 			join account a
@@ -419,14 +419,14 @@ FROM	(SELECT  c.categoryID, SUM(transactionAmt) as Activity
 		 GROUP BY c.categoryID
 				UNION
 		SELECT  tC.categoryID, SUM(catTranAmt) as Activity
-		FROM BudgetTest.categoryTransfer cT
+		FROM categoryTransfer cT
 			join category tC
 			on cT.toCategoryID = tC.categoryID
 		WHERE catTranDate <= @toDate
 		GROUP BY tC.categoryID
 				UNION
 		SELECT  fC.categoryID, SUM(catTranAmt)*-1 as Activity
-		FROM BudgetTest.categoryTransfer cT
+		FROM categoryTransfer cT
 			join category fC
 			on cT.fromCategoryID = fC.categoryID
 		WHERE catTranDate <= @toDate

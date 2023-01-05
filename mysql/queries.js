@@ -1,13 +1,14 @@
 const mysql = require("./auth");
 
-function querySql(sql) {
-  let con = mysql.getCon();
+let con = mysql.getCon();
 
-  con.connect(function (error) {
-    if (error) {
-      return console.error(error);
-    }
-  });
+con.connect(function (error) {
+  if (error) {
+    console.error(error);
+  }
+});
+
+function querySql(sql) {
 
   return new Promise((resolve, reject) => {
     con.query(sql, (error, sqlResult) => {
@@ -19,7 +20,6 @@ function querySql(sql) {
       return resolve(sqlResult);
     });
 
-    con.end();
   });
 }
 
@@ -54,7 +54,7 @@ function getAccountReport() {
 
 function getDashboardTableData(previousMonthDelta) { //0 is current month and each positive integer is another month in the past
 
-  let dashboardQuery = `call BudgetTest.getDashboardTable(CURDATE() - interval ${previousMonthDelta} month);`;
+  let dashboardQuery = `call getDashboardTable(CURDATE() - interval ${previousMonthDelta} month);`;
 
   //let safeQuery = mysql.functions.format(query, sqlData);
 
@@ -143,6 +143,12 @@ function deleteCatTransfer(catTransID) {
   return querySql(safeQuery);
 }
 
+function setSettings(settings){
+
+  let safeQuery = mysql.functions.format(`USE ??;`, [settings.database]);
+  return querySql(safeQuery);
+}
+
 module.exports = {
   getTransactionTableData,
   getCatTransTableData,
@@ -153,5 +159,6 @@ module.exports = {
   updateOrAddCatTrans,
   deleteTransaction,
   deleteCatTransfer,
-  getAccountReport
+  getAccountReport,
+  setSettings
 }
