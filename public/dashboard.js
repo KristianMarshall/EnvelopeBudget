@@ -33,7 +33,7 @@ function updateTable() {
                 `;
             }
 
-            tableHTML += `<tr class="${i == 0 ? "fs-6" : ""}">\n`;
+            tableHTML += `<tr class="${i == 0 ? "fs-6 table-info" : ""}">\n`;
             for (let j = colsToHide; j < headings.length; j++) {
                 rowData = data[i][headings[j]];
                 let classes = "";

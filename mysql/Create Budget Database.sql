@@ -458,7 +458,7 @@ LEFT JOIN (SELECT SUM(transactionAmt) as Income, MONTH(transactionDate) as Month
 FROM transaction
 WHERE transactionAmt > 0 
     AND NOT categoryID = 2
-	AND NOT transactionMemo = "Start of Budget"
+	AND (NOT transactionMemo = "Start of Budget" OR transactionMemo IS NULL)
     AND transactionDate BETWEEN @fromDate AND @toDate
 GROUP By Month) as i
 ON i.Month = months.month;
