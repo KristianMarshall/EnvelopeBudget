@@ -3,20 +3,66 @@
         <main class="col-md-9 ms-sm-auto col-lg-10">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom border-3">
                 <h1 class="h2">Settings</h1>
-                
             </div>
-            <form class="row g-4">
-                <div class="col-auto">
-                    <label class="align-middle fs-5" for="budgetDatabase">Budget Database: </label>
+            <div class="accordion" id="accordionExample">
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingOne">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                    Budget Configuration
+                  </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                  <div class="accordion-body">
+                    <table id="settingsTable" class="table table-hover table-sm">
+                      <thead>
+                        <tr>
+                          <th>Loading...</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-                <div class="col-auto">
-                  <input type="text" class="form-control" id="budgetDatabase" placeholder="BudgetTest">
+              </div>
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingTwo">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    Database Settings
+                  </button>
+                </h2>
+                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                  <div class="accordion-body">
+                    <form class="row g-4">
+                      <div class="col-auto">
+                          <label class="align-middle fs-5" for="budgetDatabase">Budget Database: </label>
+                      </div>
+                      <div class="col-auto">
+                        <input type="text" class="form-control" id="budgetDatabase" placeholder="BudgetTest">
+                      </div>
+                      <div class="col-auto">
+                        <button type="button" id="budgetButton" class="btn btn-outline-secondary mb-3">Change Database</button>
+                      </div>
+                      <div class="col-auto" id="liveAlertPlaceholder"></div>
+                    </form>
+                  </div>
                 </div>
-                <div class="col-auto">
-                  <button type="button" id="budgetButton" class="btn btn-outline-secondary mb-3">Change Database</button>
+              </div>
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingThree">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                    Other Settings Maybe
+                  </button>
+                </h2>
+                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+                  <div class="accordion-body">
+                    Maybe I'll need some other settings in the future?
+                  </div>
                 </div>
-                <div class="col-auto" id="liveAlertPlaceholder"></div>
-              </form>
+              </div>
+            </div>
+            
 
         </main>
     </div>

@@ -34,6 +34,14 @@ function getTransactionTableData(page, take) {
   return querySql(safeQuery);
 }
 
+function getSettingsTable() {
+
+  let categoriesQuery = "SELECT * FROM Categories;";
+  let categoryGroupsQuery = `SELECT * FROM catGroup;`;
+
+  return querySql(`${categoriesQuery} ${categoryGroupsQuery}`);
+}
+
 function getCatTransTableData(page, take) {
 
   let safeQuery = mysql.functions.format(`
@@ -149,7 +157,7 @@ function setSettings(settings){
   return querySql(safeQuery);
 }
 
-module.exports = {
+module.exports = { //TODO: turn this into a module
   getTransactionTableData,
   getCatTransTableData,
   getAccountBalanceData,
@@ -160,5 +168,6 @@ module.exports = {
   deleteTransaction,
   deleteCatTransfer,
   getAccountReport,
+  getSettingsTable,
   setSettings
 }

@@ -168,7 +168,7 @@ INSERT INTO categoryTransfer VALUES
 
 -- Category View
 CREATE VIEW Categories AS
-SELECT categoryID, categoryName, categoryHidden, categoryBudget, timeOpName, categoryDate, catGroupName 
+SELECT categoryID, timeOpID, catGroupID, categoryName, categoryHidden, categoryBudget, timeOpName, categoryDate, catGroupName 
 FROM category c
 	LEFT JOIN timeOptions timeO
     ON c.timeOpID = timeO.timeOpID

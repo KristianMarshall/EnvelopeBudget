@@ -69,6 +69,12 @@ app.get('/DashboardJson', (req, res) => {
   });
 });
 
+app.get('/SettingsJson', (req, res) => {
+  queries.getSettingsTable().then( result => {
+    res.json(result);
+  });
+});
+
 app.get('/githubPull', (req, res) => {
   const { exec } = require('child_process');
   exec('git pull', (err, stdout, stderr) => {
