@@ -38,9 +38,10 @@ function updateTable(){
     fetch("/SettingsJson")
     .then(res => res.json())
     .then(results => {
-        categorySettingsTable = new newHtmlTable(
+        categorySettingsTable = new settingsTable(
             document.querySelector("#settingsTable"),
             results[0],
+            results[1],
             {
                 catGroupID: {
                     hidden: true
@@ -51,6 +52,15 @@ function updateTable(){
                 timeOpID: {
                     hidden: true
                 },
+                catGroupName: {
+                    hidden: true
+                },
+                categoryHidden:{
+                    dataType: "checkbox"
+                },
+                categoryBudget:{
+                    dataType: "dollars"
+                }
             });
     });
 }
@@ -65,7 +75,15 @@ class newHtmlTable {
         this._table = tableElement;
         this._colSettings = colSettings;
         this._addRowData(tableData);
-        this._printTable();
+    }
+
+    _getFormattedData(rowID, colName){
+        let data = this._rows[rowID][colName];
+
+        if(data === null)
+            data = "";
+
+        return data;
     }
 
     _addRowData(tableData){
@@ -81,7 +99,7 @@ class newHtmlTable {
 
         for (const colName in this._rows[rowID]){
             if(!(this._colSettings[colName] !== undefined && this._colSettings[colName].hidden))
-                rowHTML += `<td>${this._rows[rowID][colName]}</td>`;
+                rowHTML += `<td>${this._getFormattedData(rowID, colName)}</td>`;
         }
 
         rowHTML += "</tr>";
@@ -111,7 +129,7 @@ class newHtmlTable {
         tableHeading.innerHTML = headingHTML;
     }
 
-    _printTable(){
+    printTable(){
         this._printHeaders();
 
         for(let rowID = 0; rowID < this._rows.length; rowID++)
@@ -119,4 +137,81 @@ class newHtmlTable {
         
 
     }
+}
+
+
+class settingsTable extends newHtmlTable {
+    #tableGroups;
+    constructor(tableElement, tableData, tableGroups, colSettings){
+        super(tableElement, tableData, colSettings);
+        this.#tableGroups = tableGroups;
+        this.printTable();
+    }
+
+    _getFormattedData(rowID, colName){
+        let data = this._rows[rowID][colName];
+        if(this._colSettings[colName] !== undefined){
+            switch(this._colSettings[colName].dataType){
+                case "checkbox":
+                    data = `<input class="form-check-input" type="checkbox" value="" ${data ? "checked" : ""}>`;
+                    break;
+                case "dollars":
+                    data = data === null ? "$0.00" : data.toLocaleString("en-CA", { style: 'currency', currency: 'CAD' });
+                    data = `<input type="text" class="form-control-plaintext p-0 b-0" value="${data}">`
+                    break;
+                case undefined:
+                    break;
+            }
+        }
+        else if(data === null)
+            data = `<input type="text" class="form-control-plaintext p-0 b-0" value="">`;
+        else
+            data = `<input type="text" class="form-control-plaintext p-0 b-0" value="${data}">`;
+
+        return data;
+    }
+
+    _printRow(rowID){
+        let tableBody = this._table.tBodies[0];
+        let rowHTML = "";
+        rowHTML += `<tr>`;
+
+        for (const colName in this._rows[rowID]){
+            if(!(this._colSettings[colName] !== undefined && this._colSettings[colName].hidden))
+                rowHTML += `<td>${this._getFormattedData(rowID, colName)}</td>`;
+        }
+
+        rowHTML += "</tr>";
+
+
+        tableBody.innerHTML += rowHTML; //calls to innerHTML overwrite the whole tbody including event listeners
+
+    }
+
+    #printCategoryGroup(catGroupID){
+        let tableBody = this._table.tBodies[0];
+        let rowHTML =  `
+        <tr class="table-secondary">
+            <td><input type="text" class="form-control-plaintext p-0 b-0 fw-bold" value="${this.#tableGroups[catGroupID-1].catGroupName}"></td>
+            <td></td><td></td><td></td><td></td>
+        </tr>`;
+
+        tableBody.innerHTML += rowHTML;
+    }
+
+    printTable(){
+        this._printHeaders();
+        let currCategory = 0;
+        for(let rowID = 2; rowID < this._rows.length; rowID++){
+
+            if(currCategory != this._rows[rowID]["catGroupID"]){
+                currCategory = this._rows[rowID]["catGroupID"];
+                this.#printCategoryGroup(currCategory);
+            }
+
+            this._printRow(rowID);
+        }
+
+    }
+
 }
