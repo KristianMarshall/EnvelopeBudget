@@ -58,7 +58,7 @@ app.get('/categoryTransfersJson', (req, res) => {
 
 app.get('/AccountBalanceJson', (req, res) => {
 
-  queries.getAccountBalanceData().then( result => {
+  queries.getAccountBalanceData(req.query.pending === 'true').then( result => {
     res.json(result);
   });
 });

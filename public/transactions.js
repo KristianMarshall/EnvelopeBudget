@@ -9,14 +9,13 @@ let take = calcTableScreenRows();
 // });
 
 function updateTable(page, take){
-    let transactionJson = fetch(`./transactionsJson?page=${page}&take=${take}`).then(response => response.json());
-    let accountBalanceJson = fetch("/AccountBalanceJson").then(response => response.json());
+    drawAccountBalances();
 
-    //This fetch grabs all of the data for the page. then draws the table with the information.
-    Promise.all([transactionJson, accountBalanceJson]).then(allData => {
-        transactionTable = new TransactionTable(document.querySelector("#transactionsTable"), allData[0]);
+    let transactionJson = fetch(`./transactionsJson?page=${page}&take=${take}`)
+    .then(response => response.json())
+    .then(allData => {
+        transactionTable = new TransactionTable(document.querySelector("#transactionsTable"), allData);
 
-        drawAccountBalances(allData[1]);
     });
 
 }

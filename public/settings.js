@@ -163,40 +163,39 @@ class settingsTable extends newHtmlTable {
                     break;
             }
         }
-        else if(data === null)
-            data = `<input type="text" class="form-control-plaintext p-0 b-0" value="">`;
         else
-            data = `<input type="text" class="form-control-plaintext p-0 b-0" value="${data}">`;
+            data = `<input type="text" class="form-control-plaintext p-0 b-0" value="${data === null ? "" : data}">`;
 
         return data;
     }
 
     _printRow(rowID){
         let tableBody = this._table.tBodies[0];
-        let rowHTML = "";
-        rowHTML += `<tr>`;
+        let rowElement = document.createElement("tr");
 
         for (const colName in this._rows[rowID]){
             if(!(this._colSettings[colName] !== undefined && this._colSettings[colName].hidden))
-                rowHTML += `<td>${this._getFormattedData(rowID, colName)}</td>`;
+                rowElement.innerHTML += `<td>${this._getFormattedData(rowID, colName)}</td>`;
         }
 
-        rowHTML += "</tr>";
-
-
-        tableBody.innerHTML += rowHTML; //calls to innerHTML overwrite the whole tbody including event listeners
-
+        tableBody.appendChild(rowElement);
     }
 
     #printCategoryGroup(catGroupID){
         let tableBody = this._table.tBodies[0];
-        let rowHTML =  `
-        <tr class="table-secondary">
-            <td><input type="text" class="form-control-plaintext p-0 b-0 fw-bold" value="${this.#tableGroups[catGroupID-1].catGroupName}"></td>
-            <td></td><td></td><td></td><td></td>
-        </tr>`;
+        let rowElement =  document.createElement("tr");
+        rowElement.classList.add("table-secondary");
 
-        tableBody.innerHTML += rowHTML;
+        rowElement.innerHTML = `
+        <td><input type="text" class="form-control-plaintext p-0 b-0 fw-bold" value="${this.#tableGroups[catGroupID-1].catGroupName}"></td>
+        <td></td><td></td><td></td>
+        <td class="d-flex justify-content-end">
+            <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex justify-content-center align-items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-circle align-text-bottom" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+            </button>
+        </td>`;
+
+        tableBody.appendChild(rowElement);
     }
 
     printTable(){

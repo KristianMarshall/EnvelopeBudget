@@ -18,21 +18,31 @@ function calcTableScreenRows(){
     return Math.floor((window.innerHeight - topMargin - bottomMargin) / rowHeight);
 }
 
-function drawAccountBalances(jsonData) {
-    let accounts = jsonData;
-    let balanceHtml = '<table class="table table-hover table-sm"> <tbody>';
+let pendingButton = document.querySelector("#pendingAccount");
 
-    accounts.forEach(account => {
-        balanceHtml += `
-        <tr>
-            <td>${account.accountName}:</td>
-            <td class="${account.balance > 0 ? "text-success" : account.balance == 0 ? "text-secondary" : "text-danger"} fw-semibold">${account.balance.toLocaleString("en-CA", { style: 'currency', currency: 'CAD' })}</td>
-        </tr>\n`;
+if(pendingButton !== null)
+    pendingButton.addEventListener("click", drawAccountBalances);
+
+
+function drawAccountBalances() {
+    let pending = pendingButton.classList.contains("active");
+    fetch(`/AccountBalanceJson?pending=${pending}`)
+    .then(response => response.json())
+    .then(accountData => {
+        let balanceHtml = '<table class="table table-hover table-sm"> <tbody>';
+
+        accountData.forEach(account => {
+            balanceHtml += `
+            <tr>
+                <td>${account.accountName}:</td>
+                <td class="${account.balance > 0 ? "text-success" : account.balance == 0 ? "text-secondary" : "text-danger"} fw-semibold">${account.balance.toLocaleString("en-CA", { style: 'currency', currency: 'CAD' })}</td>
+            </tr>\n`;
+        });
+
+        balanceHtml += '</tbody></table>';
+
+        document.querySelector("#AB").innerHTML = balanceHtml;
     });
-
-    balanceHtml += '</tbody></table>';
-
-    document.querySelector("#AB").innerHTML = balanceHtml;
 }
 
 class htmlTable {

@@ -197,7 +197,22 @@ FROM transaction t
     ON t.accountID = a.accountID
     LEFT JOIN vendor v
     ON t.vendorID = v.vendorID
-GROUP BY accountName;
+GROUP BY a.accountID
+ORDER BY a.accountID;
+
+-- Account Pending Balance View
+CREATE VIEW AccountPendingBalance AS
+SELECT  SUM(transactionAmt) as balance, accountName
+FROM transaction t
+	JOIN category c
+    ON t.categoryID = c.categoryID
+    JOIN account a
+    ON t.accountID = a.accountID
+    LEFT JOIN vendor v
+    ON t.vendorID = v.vendorID
+WHERE transactionPending = 0
+GROUP BY a.accountID
+ORDER BY a.accountID;
 
 -- Category Transaction View
 CREATE VIEW CategoryTransfers AS

@@ -2,12 +2,14 @@ let monthDelta = 0;
 
 function updateTable() {
     let colsToHide = 2;
-    let dashboardJson = fetch(`/DashboardJson?month=${monthDelta}`).then(response => response.json());
-    let accountBalanceJson = fetch("/AccountBalanceJson").then(response => response.json());
 
-    Promise.all([dashboardJson, accountBalanceJson]).then(allData => {
+    drawAccountBalances();
+
+    fetch(`/DashboardJson?month=${monthDelta}`)
+    .then(response => response.json())
+    .then(allData => {
         //Handling data from the dashboard json
-        let data = allData[0][1];
+        let data = allData[1];
         let headings = Object.keys(data[0]);
         let tableHTML = "";
 
@@ -25,7 +27,7 @@ function updateTable() {
                 currentGroup = data[i]["catGroupID"];
                 tableHTML += `
                 <tr class="table-secondary">
-                    <th>${allData[0][2][currentGroup-1].catGroupName}</th>
+                    <th>${allData[2][currentGroup-1].catGroupName}</th>
                     <th></th>
                     <th></th>
                     <th></th>
@@ -55,14 +57,12 @@ function updateTable() {
             tableHTML += "</tr>\n";
         }
         document.querySelector("#dashboard").innerHTML = tableHTML;
-        let selectedDate = new Date(allData[0][0][0]["End Date"]); //this comes in with weird timezone stuff so it actually thinks its the day before
+        let selectedDate = new Date(allData[0][0]["End Date"]); //this comes in with weird timezone stuff so it actually thinks its the day before
         
         let currMonthText = document.querySelector("#curMonth");
         currMonthText.innerHTML = `   ${months[selectedDate.getMonth()]}, ${selectedDate.getFullYear()}   `;
         currMonthText.classList.remove("placeholder");
         currMonthText.classList.remove("col-2");
-
-        drawAccountBalances(allData[1]);
     });
 }
 updateTable();

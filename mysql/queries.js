@@ -52,8 +52,12 @@ function getCatTransTableData(page, take) {
   return querySql(safeQuery);
 }
 
-function getAccountBalanceData() {
-  return querySql(`SELECT * FROM AccountBalance;`);
+function getAccountBalanceData(pending) {
+  let query = `SELECT * FROM AccountBalance;`;
+  if(pending)
+    query = `SELECT * FROM AccountPendingBalance;`
+
+  return querySql(query);
 }
 
 function getAccountReport() {
