@@ -38,8 +38,9 @@ function getSettingsTable() {
 
   let categoriesQuery = "SELECT * FROM Categories;";
   let categoryGroupsQuery = `SELECT * FROM catGroup;`;
+  let timeOptionsQuery = `SELECT timeOpID AS id, timeOpName AS name FROM timeOptions`;
 
-  return querySql(`${categoriesQuery} ${categoryGroupsQuery}`);
+  return querySql(`${categoriesQuery} ${categoryGroupsQuery} ${timeOptionsQuery}`);
 }
 
 function getCatTransTableData(page, take) {

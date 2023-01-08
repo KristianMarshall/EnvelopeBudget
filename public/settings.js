@@ -42,6 +42,7 @@ function updateTable(){
             document.querySelector("#settingsTable"),
             results[0],
             results[1],
+            results[2],
             {
                 catGroupID: {
                     hidden: true
@@ -49,17 +50,23 @@ function updateTable(){
                 categoryID: {
                     hidden: true
                 },
-                timeOpID: {
+                timeOpName: {
                     hidden: true
                 },
                 catGroupName: {
                     hidden: true
                 },
-                categoryHidden:{
+                Hidden:{
                     dataType: "checkbox"
                 },
-                categoryBudget:{
+                Budget:{
                     dataType: "dollars"
+                },
+                "Bill Date":{
+                    dataType: "date"
+                },
+                "Frequency":{
+                    dataType: "frequency"
                 }
             });
     });
@@ -142,9 +149,11 @@ class newHtmlTable {
 
 class settingsTable extends newHtmlTable {
     #tableGroups;
-    constructor(tableElement, tableData, tableGroups, colSettings){
+    #timeOptions;
+    constructor(tableElement, tableData, tableGroups, timeOptions, colSettings){
         super(tableElement, tableData, colSettings);
         this.#tableGroups = tableGroups;
+        this.#timeOptions = timeOptions;
         this.printTable();
     }
 
@@ -158,6 +167,13 @@ class settingsTable extends newHtmlTable {
                 case "dollars":
                     data = data === null ? "$0.00" : data.toLocaleString("en-CA", { style: 'currency', currency: 'CAD' });
                     data = `<input type="text" class="form-control-plaintext p-0 b-0" value="${data}">`
+                    break;
+                case "date":
+                    data = data === null ? "" : (new Date(data)).toLocaleDateString("en-CA");
+                    data = `<input type="date" class="form-control-plaintext p-0 b-0" value="${data}" style="width: 110px;">`;
+                    break;
+                case "frequency":
+                    data = this.#createDropdown(this.#timeOptions, "Frequency", data);
                     break;
                 case undefined:
                     break;
@@ -179,6 +195,19 @@ class settingsTable extends newHtmlTable {
         }
 
         tableBody.appendChild(rowElement);
+    }
+
+    #createDropdown(typeObj, name, selected) {
+        let dropdownHtml = `
+        <select class="rowInput form-select form-select-sm w-auto">
+            <option value=""> -- Select a ${name} -- </option>`;
+
+        typeObj.forEach(object => {
+            dropdownHtml += `<option value="${object.id}" ${selected === object.id ? "selected" : ""}>${object.name}</option>`;
+        });
+
+        dropdownHtml += "</select>";
+        return dropdownHtml;
     }
 
     #printCategoryGroup(catGroupID){
@@ -211,6 +240,7 @@ class settingsTable extends newHtmlTable {
             this._printRow(rowID);
         }
 
+        //TODO: add a change event listener to validate and show the apply button
     }
 
 }
