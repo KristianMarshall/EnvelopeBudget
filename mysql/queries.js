@@ -26,7 +26,7 @@ function querySql(sql) {
 function getTransactionTableData(page, take) {
   let transactionsQuery = `SELECT * FROM Transactions LIMIT ?, ?;`;
   let categoriesQuery = "SELECT categoryID as id, categoryName as name FROM category;";
-  let accountsQuery = "SELECT accountID as id, accountName as name FROM BudgetTest.account;";
+  let accountsQuery = "SELECT accountID as id, accountName as name FROM account;";
   let vendorsQuery = "SELECT vendorID as id, vendorName as name FROM vendor;";
 
   let safeQuery = mysql.functions.format(`${transactionsQuery} ${categoriesQuery} ${accountsQuery} ${vendorsQuery}`, [page*take, take]);

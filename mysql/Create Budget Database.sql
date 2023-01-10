@@ -387,7 +387,7 @@ CREATE PROCEDURE getDashboardTable(dateMonth DATE)
 BEGIN
 SET @toDate = LAST_DAY(dateMonth), @fromDate = DATE_SUB(dateMonth, INTERVAL DAYOFMONTH(dateMonth)-1 DAY);
 SELECT dateMonth as Date, @fromDate as "Start Date", @toDate as "End Date";
-SELECT category.categoryID, category.catGroupID, category.categoryName as Envelope, cB.Balance, Activity, totalBudgeted as "Total Budgeted"
+SELECT category.categoryID, category.catGroupID, category.categoryHidden, category.categoryName as Envelope, cB.Balance, Activity, totalBudgeted as "Total Budgeted"
 FROM category
 LEFT JOIN
 (SELECT  t.categoryID, SUM(transactionAmt) as Activity

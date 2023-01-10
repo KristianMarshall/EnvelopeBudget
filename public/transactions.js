@@ -275,7 +275,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             let inputElement = "";
             switch (index) {
                 case 0:
-                    inputElement = `<input type="date" class="rowInput">`;
+                    inputElement = `<input type="date" class="rowInput" value="${new Date().toLocaleDateString("en-CA")}">`;
                     break;
                 case 1:
                     inputElement = `<input size=8 class="rowInput">`;

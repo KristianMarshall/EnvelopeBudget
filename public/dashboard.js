@@ -1,7 +1,7 @@
 let monthDelta = 0;
 
 function updateTable() {
-    let colsToHide = 2;
+    let colsToHide = 3;
 
     drawAccountBalances();
 
@@ -34,27 +34,28 @@ function updateTable() {
                 </tr>
                 `;
             }
-
-            tableHTML += `<tr class="${i == 0 ? "fs-6 table-info" : ""}">\n`;
-            for (let j = colsToHide; j < headings.length; j++) {
-                rowData = data[i][headings[j]];
-                let classes = "";
-                if (rowData == null)
-                    rowData = "$0.00";
-                else if (typeof rowData == "number"){  
-                    if(j == colsToHide+1 && rowData != 0){
-                        classes = "fw-semibold ";
-                        if(rowData > 0)
-                            classes += "text-success";
-                        else
-                            classes += "text-danger";
+            if(!data[i]["categoryHidden"]){
+                tableHTML += `<tr class="${i == 0 ? "fs-6 table-info" : ""}">\n`;
+                for (let j = colsToHide; j < headings.length; j++) {
+                    rowData = data[i][headings[j]];
+                    let classes = "";
+                    if (rowData == null)
+                        rowData = "$0.00";
+                    else if (typeof rowData == "number"){  
+                        if(j == colsToHide+1 && rowData != 0){
+                            classes = "fw-semibold ";
+                            if(rowData > 0)
+                                classes += "text-success";
+                            else
+                                classes += "text-danger";
+                        }
+                        rowData = rowData.toLocaleString("en-CA", { style: 'currency', currency: 'CAD' });   
                     }
-                    rowData = rowData.toLocaleString("en-CA", { style: 'currency', currency: 'CAD' });   
-                }
 
-                tableHTML += `<td class="${classes}">${rowData}</td>\n`;
+                    tableHTML += `<td class="${classes}">${rowData}</td>\n`;
+                }
+                tableHTML += "</tr>\n";
             }
-            tableHTML += "</tr>\n";
         }
         document.querySelector("#dashboard").innerHTML = tableHTML;
         let selectedDate = new Date(allData[0][0]["End Date"]); //this comes in with weird timezone stuff so it actually thinks its the day before
