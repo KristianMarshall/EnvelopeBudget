@@ -166,7 +166,7 @@ class settingsTable extends newHtmlTable {
                     break;
                 case "dollars":
                     data = data === null ? "$0.00" : data.toLocaleString("en-CA", { style: 'currency', currency: 'CAD' });
-                    data = `<input type="text" class="form-control-plaintext p-0 b-0" value="${data}">`
+                    data = `<input type="number" step="0.01" class="form-control-plaintext p-0 b-0 fw-semibold" placeholder="${data}" required>`
                     break;
                 case "date":
                     data = data === null ? "" : (new Date(data)).toLocaleDateString("en-CA");
