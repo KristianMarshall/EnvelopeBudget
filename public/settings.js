@@ -1,5 +1,26 @@
 let categorySettingsTable;
 
+(() => {
+    'use strict'
+
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    const forms = document.querySelectorAll('.needs-validation')
+
+    // Loop over them and prevent submission
+    Array.from(forms).forEach(form => {
+      form.addEventListener('submit', event => {
+        if (!form.checkValidity()) {
+          console.log("not valid");
+        } else {
+          console.log("valid");
+        }
+        event.preventDefault()
+        event.stopPropagation()
+        form.classList.add('was-validated')
+      }, false)
+    })
+  })()
+
 document.querySelector("a.nav-link.px-3").classList.add("active");
 
 document.querySelector("#budgetButton").addEventListener("click", event =>{
@@ -13,7 +34,7 @@ document.querySelector("#budgetButton").addEventListener("click", event =>{
         .then(response => response.json())
         .then(result => {
             console.log(result);
-            if(result.serverStatus == 2)
+            if(result.serverStatus === 16386)
                 alert('Budget database changed successfully!', 'success');
             else
                 alert(`Budget database failed: ${result.code}`, 'danger');
@@ -166,11 +187,11 @@ class settingsTable extends newHtmlTable {
                     break;
                 case "dollars":
                     data = data === null ? "$0.00" : data.toLocaleString("en-CA", { style: 'currency', currency: 'CAD' });
-                    data = `<input type="number" step="0.01" class="form-control-plaintext p-0 b-0 fw-semibold" placeholder="${data}" required>`
+                    data = `<input type="number" step="0.01" class="form-control fw-semibold py-1" placeholder="${data}">`
                     break;
                 case "date":
                     data = data === null ? "" : (new Date(data)).toLocaleDateString("en-CA");
-                    data = `<input type="date" class="form-control-plaintext p-0 b-0" value="${data}" style="width: 110px;">`;
+                    data = `<input type="date" class="form-control-plaintext p-0 b-0" value="${data}" style="width: 110px;" >`;
                     break;
                 case "frequency":
                     data = this.#createDropdown(this.#timeOptions, "Frequency", data);
@@ -199,8 +220,8 @@ class settingsTable extends newHtmlTable {
 
     #createDropdown(typeObj, name, selected) {
         let dropdownHtml = `
-        <select class="rowInput form-select form-select-sm w-auto">
-            <option value=""> -- Select a ${name} -- </option>`;
+        <select class="rowInput form-select w-auto py-1" required>
+            <option selected disabled value=""> -- Select a ${name} -- </option>`;
 
         typeObj.forEach(object => {
             dropdownHtml += `<option value="${object.id}" ${selected === object.id ? "selected" : ""}>${object.name}</option>`;

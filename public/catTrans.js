@@ -295,7 +295,7 @@ class CatTransTable extends htmlTable {
     #createDropdown(typeObj, name) {
         let dropdownHtml = `
         <select class="rowInput form-select form-select-sm">
-            <option value=""> -- Select a ${name} -- </option>`;
+            <option selected disabled value=""> -- Select a ${name} -- </option>`;
 
         typeObj.forEach(object => {
             dropdownHtml += `<option value="${object.id}">${object.name}</option>`;
