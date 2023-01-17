@@ -1,7 +1,12 @@
-const mysql = require("./auth");
+const mysql = require('mysql2');
+const config = require("./auth");
 
-const pool = mysql.getPool();
+config.dbInfo.database = "BudgetTest";
+const poolTest = mysql.createPool(config.dbInfo);
+config.dbInfo.database = "Budget";
+const poolReal = mysql.createPool(config.dbInfo);
 
+let pool = poolTest;
 
 function querySql(sql) {
 
@@ -24,7 +29,7 @@ function getTransactionTableData(page, take) {
   let accountsQuery = "SELECT accountID as id, accountName as name FROM account;";
   let vendorsQuery = "SELECT vendorID as id, vendorName as name FROM vendor;";
 
-  let safeQuery = mysql.functions.format(`${transactionsQuery} ${categoriesQuery} ${accountsQuery} ${vendorsQuery}`, [page*take, take]);
+  let safeQuery = mysql.format(`${transactionsQuery} ${categoriesQuery} ${accountsQuery} ${vendorsQuery}`, [page*take, take]);
 
   return querySql(safeQuery);
 }
@@ -40,7 +45,7 @@ function getSettingsTable() {
 
 function getCatTransTableData(page, take) {
 
-  let safeQuery = mysql.functions.format(`
+  let safeQuery = mysql.format(`
   SELECT * FROM CategoryTransfers LIMIT ?, ?; 
   SELECT categoryID as id, categoryName as name FROM category;`,
   [page*take, take]);
@@ -64,13 +69,13 @@ function getDashboardTableData(previousMonthDelta) { //0 is current month and ea
 
   let dashboardQuery = `call getDashboardTable(CURDATE() - interval ${previousMonthDelta} month);`;
 
-  //let safeQuery = mysql.functions.format(query, sqlData);
+  //let safeQuery = mysql.format(query, sqlData);
 
   return querySql(dashboardQuery);
 }
 
 function addNewVendor(vendor) {
-  return querySql(mysql.functions.format(`INSERT INTO vendor VALUES (0, ?)`, [vendor]));
+  return querySql(mysql.format(`INSERT INTO vendor VALUES (0, ?)`, [vendor]));
 }
 
 function updateOrAddTransaction(transaction, vendorAddResult) {
@@ -103,7 +108,7 @@ function updateOrAddTransaction(transaction, vendorAddResult) {
     sqlData.pop();
   }
 
-  let safeQuery = mysql.functions.format(query, sqlData);
+  let safeQuery = mysql.format(query, sqlData);
 
   return querySql(safeQuery);
 }
@@ -132,29 +137,31 @@ function updateOrAddCatTrans(catTransfer) {
     sqlData.pop();
   }
 
-  let safeQuery = mysql.functions.format(query, sqlData);
+  let safeQuery = mysql.format(query, sqlData);
 
   return querySql(safeQuery)
 }
 
 function deleteTransaction(transactionID) {
   let query = "DELETE FROM transaction WHERE transactionID = ?;";
-  let safeQuery = mysql.functions.format(query, [transactionID]);
+  let safeQuery = mysql.format(query, [transactionID]);
 
   return querySql(safeQuery);
 }
 
 function deleteCatTransfer(catTransID) {
   let query = "DELETE FROM categoryTransfer WHERE catTranID = ?;";
-  let safeQuery = mysql.functions.format(query, [catTransID]);
+  let safeQuery = mysql.format(query, [catTransID]);
 
   return querySql(safeQuery);
 }
 
 function setSettings(settings){
-
-  let safeQuery = mysql.functions.format(`USE ??;`, [settings.database]);
-  return querySql(safeQuery);
+  if(settings.database == "Budget") 
+    pool = poolReal;
+  else
+    pool = poolTest; 
+  return true;
 }
 
 module.exports = { //TODO: turn this into a module

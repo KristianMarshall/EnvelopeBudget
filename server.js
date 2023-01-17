@@ -133,11 +133,7 @@ app.post('/catTranDeleteJson', (req, res) => {
 });
 
 app.post('/settingsJson', (req, res) => {
-
-  queries.setSettings(req.body).then(result => {
-      console.log(result);
-      res.json(result);
-  });
+  res.json(queries.setSettings(req.body));
 });
 
 app.listen(PORT, () => {
