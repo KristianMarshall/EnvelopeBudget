@@ -34,7 +34,7 @@ document.querySelector("#budgetButton").addEventListener("click", event =>{
         .then(response => response.json())
         .then(result => {
             console.log(result);
-            if(result.serverStatus === 16386)
+            if(result)
                 alert('Budget database changed successfully!', 'success');
             else
                 alert(`Budget database failed: ${result.code}`, 'danger');
@@ -48,7 +48,7 @@ const alert = (message, type) => {
   wrapper.innerHTML = [
     `<div class="alert alert-${type} alert-dismissible" role="alert">`,
     `   <div>${message}</div>`,
-    '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>', //TODO: maybe make this non dismissible
+    '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
     '</div>'
   ].join('')
 

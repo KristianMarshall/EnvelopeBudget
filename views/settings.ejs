@@ -34,6 +34,29 @@
                 </div>
               </div>
               <div class="accordion-item">
+                <h2 class="accordion-header" id="headingThree">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                    Account Settings
+                  </button>
+                </h2>
+                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#settingsAccordion">
+                  <div class="accordion-body">
+                    <div class="table-responsive text-nowrap">
+                      <table id="accountTable" class="table table-hover table-sm">
+                        <thead>
+                          <tr>
+                            <th>Loading...</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+              
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="accordion-item">
                 <h2 class="accordion-header" id="headingTwo">
                   <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
                     Database Settings
@@ -43,28 +66,17 @@
                   <div class="accordion-body">
                     <form class="row g-4">
                       <div class="col-auto">
-                          <label class="align-middle fs-5" for="budgetDatabase">Budget Database: </label>
-                      </div>
-                      <div class="col-auto">
-                        <input type="text" class="form-control" id="budgetDatabase" placeholder="BudgetTest">
+                        <select class="form-select" id="budgetDatabase">
+                          <option selected disabled  value=""> -- Select a Database -- </option>
+                          <option value="BudgetTest">Testing Database</option>
+                          <option value="Budget">Real Database</option>
+                        </select>
                       </div>
                       <div class="col-auto">
                         <button type="button" id="budgetButton" class="btn btn-outline-secondary mb-3">Change Database</button>
                       </div>
                       <div class="col-auto" id="liveAlertPlaceholder"></div>
                     </form>
-                  </div>
-                </div>
-              </div>
-              <div class="accordion-item">
-                <h2 class="accordion-header" id="headingThree">
-                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                    Other Settings Maybe
-                  </button>
-                </h2>
-                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#settingsAccordion">
-                  <div class="accordion-body">
-                    Maybe I'll need some other settings in the future?
                   </div>
                 </div>
               </div>
