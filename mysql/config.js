@@ -2,7 +2,7 @@
 const mysql = require('mysql2');
 
 module.exports = {
-  getCon: () => mysql.createConnection({
+  getPool: () => mysql.createPool({
     host: "localhost",
     user: "your user",
     password: "your password",

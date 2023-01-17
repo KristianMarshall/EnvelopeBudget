@@ -1,17 +1,12 @@
 const mysql = require("./auth");
 
-let con = mysql.getCon();
+const pool = mysql.getPool();
 
-con.connect(function (error) {
-  if (error) {
-    console.error(error);
-  }
-});
 
 function querySql(sql) {
 
   return new Promise((resolve, reject) => {
-    con.query(sql, (error, sqlResult) => {
+    pool.query(sql, (error, sqlResult) => {
       if (error) {
         console.log(error);  //WAS: return reject(error);
         return resolve(error);
