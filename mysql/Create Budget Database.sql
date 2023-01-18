@@ -173,7 +173,9 @@ FROM category c
 	LEFT JOIN timeOptions timeO
     ON c.timeOpID = timeO.timeOpID
     LEFT JOIN catGroup cT
-    on c.catGroupID = cT.catGroupID;
+    on c.catGroupID = cT.catGroupID
+WHERE NOT categoryID = 2
+ORDER BY c.catGroupID, categoryID;
 
 -- Transaction View
 CREATE VIEW Transactions AS
@@ -480,5 +482,39 @@ ON i.Month = months.month;
 END$$
 
 -- //TODO: still need to add account Report that works by account id
+
+-- Automatically added category transfers when you get a paycheque
+CREATE PROCEDURE autoCatTrans(monthDate DATE) 
+BEGIN
+SET @currentMonth = MONTH(monthDate), @numOfPaycheques = (SELECT count(transactionDate) FROM transaction
+where transactionMemo LIKE "%Paycheque%" AND MONTH(transactionDate) = MONTH(CURDATE()));
+
+INSERT INTO categoryTransfer(catTranDate, catTranAmt, fromCategoryID, toCategoryID, catTranMemo)
+
+SELECT CONCAT("2022-0",@currentMonth,"-01") as catTranDate, (ROUND((categoryBudget-totalBudgeted)/1/*numOfPaycheques*/, 2)) as catTranAmt, 1 as fromCategoryID, category.categoryID as toCategoryID, CONCAT("Auto Transfer ", @numOfPaycheques+1) as catTranMemo FROM category
+JOIN
+(SELECT category.categoryID, IFNULL(SUM(totalBudgeted), 0) as totalBudgeted FROM category
+LEFT JOIN
+(SELECT categoryID, SUM(catTranAmt) as totalBudgeted
+	FROM categoryTransfer cT
+		join category tC
+		on cT.toCategoryID = tC.categoryID
+	WHERE MONTH(catTranDate) = @currentMonth AND (NOT catTranMemo = "Extra" OR catTranMemo IS NULL)
+	GROUP BY categoryID
+		UNION
+SELECT categoryID, SUM(catTranAmt)*-1 as Activity
+	FROM categoryTransfer cT
+		join category fC
+		on cT.fromCategoryID = fC.categoryID
+	WHERE MONTH(catTranDate) = @currentMonth AND (NOT catTranMemo = "Extra" OR catTranMemo IS NULL) 
+	GROUP BY categoryID) as almostTotalBudgeted
+ON category.categoryID = almostTotalBudgeted.categoryID
+GROUP BY categoryID
+HAVING totalBudgeted >= 0) as categoryBalance
+ON categoryBalance.categoryID = category.categoryID
+WHERE NOT category.categoryID = 1
+HAVING catTranAmt > 0
+ORDER BY category.categoryID;
+END$$
 
 DELIMITER ;

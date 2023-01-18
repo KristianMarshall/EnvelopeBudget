@@ -23,7 +23,7 @@ function updateTable() {
 
         for (let i = 0; i < data.length; i++) {
             //If we are at a new group print a heading for it
-            if(currentGroup != data[i]["catGroupID"]){
+            if(currentGroup != data[i]["catGroupID"] && !data[i]["categoryHidden"]){
                 currentGroup = data[i]["catGroupID"];
                 tableHTML += `
                 <tr class="table-secondary">

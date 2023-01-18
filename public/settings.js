@@ -172,6 +172,7 @@ class settingsTable extends newHtmlTable {
     #tableGroups;
     #timeOptions;
     constructor(tableElement, tableData, tableGroups, timeOptions, colSettings){
+        tableData[0]["Envelope Name"] = "Paycheque";
         super(tableElement, tableData, colSettings);
         this.#tableGroups = tableGroups;
         this.#timeOptions = timeOptions;
@@ -251,7 +252,7 @@ class settingsTable extends newHtmlTable {
     printTable(){
         this._printHeaders();
         let currCategory = 0;
-        for(let rowID = 2; rowID < this._rows.length; rowID++){
+        for(let rowID = 0; rowID < this._rows.length; rowID++){
 
             if(currCategory != this._rows[rowID]["catGroupID"]){
                 currCategory = this._rows[rowID]["catGroupID"];
