@@ -484,14 +484,29 @@ END$$
 -- //TODO: still need to add account Report that works by account id
 
 -- Automatically added category transfers when you get a paycheque
-CREATE PROCEDURE autoCatTrans(monthDate DATE) 
+CREATE PROCEDURE autoCatTrans() 
 BEGIN
-SET @currentMonth = MONTH(monthDate), @numOfPaycheques = (SELECT count(transactionDate) FROM transaction
-where transactionMemo LIKE "%Paycheque%" AND MONTH(transactionDate) = MONTH(CURDATE()));
+SET 
+	@currentDate = CURDATE(), 
+	@numOfPaycheques = (SELECT count(transactionDate) FROM transaction
+		where transactionMemo LIKE "%Paycheque%" AND MONTH(transactionDate) = MONTH(@currentDate));
+SET	
+	@paychequesLeft = (
+		with recursive monthDates as (
+			select date(concat(year(@currentDate),"-",month(@currentDate), "-01")) as calendar_date
+			union all
+			select date_add(calendar_date, interval 1 day) as calendar_date from monthDates 
+			where date_add(calendar_date, interval 1 day) < LAST_DAY(@currentDate)+1
+		)
+		select count(calendar_date) as PaychequesLeft
+		from monthDates
+		where weekofyear(calendar_date) % 2 = 0 AND dayofweek(calendar_date) = 6)-@numOfPaycheques;
+        
+select @numOfPaycheques, @paychequesLeft;
 
 INSERT INTO categoryTransfer(catTranDate, catTranAmt, fromCategoryID, toCategoryID, catTranMemo)
 
-SELECT CONCAT("2022-0",@currentMonth,"-01") as catTranDate, (ROUND((categoryBudget-totalBudgeted)/1/*numOfPaycheques*/, 2)) as catTranAmt, 1 as fromCategoryID, category.categoryID as toCategoryID, CONCAT("Auto Transfer ", @numOfPaycheques+1) as catTranMemo FROM category
+SELECT @currentDate as catTranDate, (ROUND((categoryBudget-totalBudgeted)/(@paychequesLeft+1), 2)) as catTranAmt, 1 as fromCategoryID, category.categoryID as toCategoryID, CONCAT("Auto Transfer ", @numOfPaycheques+1) as catTranMemo FROM category
 JOIN
 (SELECT category.categoryID, IFNULL(SUM(totalBudgeted), 0) as totalBudgeted FROM category
 LEFT JOIN
@@ -499,14 +514,14 @@ LEFT JOIN
 	FROM categoryTransfer cT
 		join category tC
 		on cT.toCategoryID = tC.categoryID
-	WHERE MONTH(catTranDate) = @currentMonth AND (NOT catTranMemo = "Extra" OR catTranMemo IS NULL)
+	WHERE MONTH(catTranDate) = MONTH(@currentDate) AND (NOT catTranMemo = "Extra" OR catTranMemo IS NULL)
 	GROUP BY categoryID
 		UNION
 SELECT categoryID, SUM(catTranAmt)*-1 as Activity
 	FROM categoryTransfer cT
 		join category fC
 		on cT.fromCategoryID = fC.categoryID
-	WHERE MONTH(catTranDate) = @currentMonth AND (NOT catTranMemo = "Extra" OR catTranMemo IS NULL) 
+	WHERE MONTH(catTranDate) = MONTH(@currentDate) AND (NOT catTranMemo = "Extra" OR catTranMemo IS NULL) 
 	GROUP BY categoryID) as almostTotalBudgeted
 ON category.categoryID = almostTotalBudgeted.categoryID
 GROUP BY categoryID
