@@ -316,6 +316,7 @@ class TransactionTable extends htmlTable { //TODO: should make rows and cells th
             if (event.target.value === "addNew") {
                 event.target.insertAdjacentHTML("afterend", "<input size=15>");
                 event.target.remove();
+                //TODO: focus text box
             }
         })
 
