@@ -182,13 +182,13 @@ Project Link: [https://github.com/KristianMarshall/EnvelopeBudget](https://githu
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
-[oldDashboard-screenshot]: Pictures/Old%20Dashboard.png
+[oldDashboard-screenshot]: Pictures/OldDashboard.png
 [dashboard-screenshot]: Pictures/Dashboard.png
 [transactions-screenshot]: Pictures/Transactions.png
 [settings-screenshot]: Pictures/Settings.png
 [sidebarPhone-screenshot]: Pictures/sidebarPhone.jpg
 [transactionsPhone-screenshot]: Pictures/transactionsPhone.jpg
 [dashboardPhone-screenshot]: Pictures/dashboardPhone.jpg
-[accountReport-screenshot]: Pictures/Account%20Report.png
+[accountReport-screenshot]: Pictures/AccountReport.png
 [Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
 [Bootstrap-url]: https://getbootstrap.com
