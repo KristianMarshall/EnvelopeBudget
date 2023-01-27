@@ -1,3 +1,4 @@
+
 <a name="readme-top"></a>
 <!-- PROJECT LOGO -->
 <br />
@@ -54,9 +55,9 @@ I was pretty happy with the functionality. However I was not happy with the look
 
 ![oldDashboard-screenshot]
 
-One bonus to bootstrap is it also helped me make the page responsive. This is handy to use the app on my phone.
+One bonus to bootstrap is it also helped me make the page responsive. It's really handy to be able to actually use the app on my phone.
 
-![dashboardPhone-screenshot] ![transactionsPhone-screenshot] ![sidebarPhone-screenshot]
+ <img src="https://github.com/KristianMarshall/EnvelopeBudget/blob/main/Pictures/dashboardPhone.jpg" alt="Phone Dashboard Page" width="300px">  <img src="https://github.com/KristianMarshall/EnvelopeBudget/blob/main/Pictures/transactionsPhone.jpg" alt="Phone Transaction Page" width="300px">  <img src="https://github.com/KristianMarshall/EnvelopeBudget/blob/main/Pictures/sidebarPhone.jpg" alt="Phone Sidebar" width="300px">
 
 Overall I'm pretty happy with the project and I think it can now replace my spreadsheet. but I think it's going to be one of those projects where i will always be adding new features and tweaking something.
 
@@ -137,7 +138,6 @@ The settings page is where you setup your accounts and envelopes.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-
 <!-- ROADMAP -->
 ## Roadmap
 
@@ -186,9 +186,9 @@ Project Link: [https://github.com/KristianMarshall/EnvelopeBudget](https://githu
 [dashboard-screenshot]: Pictures/Dashboard.png
 [transactions-screenshot]: Pictures/Transactions.png
 [settings-screenshot]: Pictures/Settings.png
-[sidebarPhone-screenshot]: Pictures/sidebarPhone.png
-[transactionsPhone-screenshot]: Pictures/transactionsPhone.png
-[dashboardPhone-screenshot]: Pictures/dashboardPhone.png
+[sidebarPhone-screenshot]: Pictures/sidebarPhone.jpg
+[transactionsPhone-screenshot]: Pictures/transactionsPhone.jpg
+[dashboardPhone-screenshot]: Pictures/dashboardPhone.jpg
 [accountReport-screenshot]: Pictures/Account%20Report.png
 [Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
 [Bootstrap-url]: https://getbootstrap.com
